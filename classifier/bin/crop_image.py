@@ -27,6 +27,8 @@ def crop_logo_and_assign_label(img_dir, cropped_img_dir, annot_file, labeldata, 
         x1, y1, x2, y2 = int(data[2]), int(data[3]), int(data[4]), int(data[5])
 
         img = cv2.imread(os.path.join(img_dir, fname))
+        if x1 == x2 and y1 == y2:
+            continue
         cropped_img = img[y1:y2, x1:x2]
 
         # save a cropped image
