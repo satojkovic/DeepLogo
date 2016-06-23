@@ -9,10 +9,17 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string(
     "train_dir", "logo_images/cropped",
     "Directory where to write event logs and checkpoint.")
+tf.app.flags.DEFINE_integer("max_steps", 10000, "Number of batches to run.")
+tf.app.flags.DEFINE_integer("image_size", 64, "Size of an input image.")
+
+
+def inference():
+    pass
 
 
 def train():
-    pass
+    with tf.Graph().as_default():
+        logits = inference()
 
 
 def main():
