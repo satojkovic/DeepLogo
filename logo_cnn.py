@@ -3,11 +3,12 @@
 from __future__ import print_function
 import tensorflow as tf
 import numpy as np
+import os
 
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string(
-    "train_dir", "logo_images/cropped",
+    "train_dir", "flickr_logos_27_dataset",
     "Directory where to write event logs and checkpoint.")
 tf.app.flags.DEFINE_integer("max_steps", 10000, "Number of batches to run.")
 tf.app.flags.DEFINE_integer("image_size", 64, "Size of an input image.")
@@ -27,6 +28,16 @@ def read_flickrlogos27(train_dir):
     record_bytes = label_bytes + image_bytes
 
 
+def cropped_inputs():
+    if tf.gfile.Exists(os.path.join(
+            FLAGS.train_dir,
+            'flickr_logos_27_dataset_training_set_annotation.txt')):
+        raise ValueError(
+            'Failed to find file: flickr_logos_27_dataset_training_set_annotation.txt')
+    annot_train = np.loadtxt(
+        os.path.join(FLAGS.train_dir,
+                     'flickr_logos_27_dataset_training_set_annotation.txt'))
+
 
 def inference():
     pass
@@ -34,6 +45,8 @@ def inference():
 
 def train():
     with tf.Graph().as_default():
+        images, labels = cropped_inputs()
+
         logits = inference()
 
 
