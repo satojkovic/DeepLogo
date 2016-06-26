@@ -14,7 +14,7 @@ tf.app.flags.DEFINE_integer("max_steps", 10000, "Number of batches to run.")
 tf.app.flags.DEFINE_integer("image_size", 64, "Size of an input image.")
 
 
-def read_flickrlogos27(train_dir):
+def read_flickrlogos27(filename_queue):
     class FlickrLogos27Record():
         pass
 
@@ -27,6 +27,8 @@ def read_flickrlogos27(train_dir):
     image_bytes = result.width * result.height * result.depth
     record_bytes = label_bytes + image_bytes
 
+    reader = tf.FixedLengthRecordReader(record_bytes=record_bytes)
+
 
 def cropped_inputs():
     if tf.gfile.Exists(os.path.join(
@@ -37,6 +39,13 @@ def cropped_inputs():
     annot_train = np.loadtxt(
         os.path.join(FLAGS.train_dir,
                      'flickr_logos_27_dataset_training_set_annotation.txt'))
+
+    filenames = [os.path.join(FLAGS.train_dir, annot[0])
+                 for annot in annot_train]
+
+    filename_queue = tf.train.input_producer(filenames)
+
+    read_input = read_flickrlogos27(filename_queue)
 
 
 def inference():
