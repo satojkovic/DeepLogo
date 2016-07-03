@@ -3,15 +3,15 @@
 import numpy as np
 import os
 from PIL import Image
+from collections import defaultdict
 
 CNN_IMAGE_SIZE = 32
 postfix = str(CNN_IMAGE_SIZE) + 'x' + str(CNN_IMAGE_SIZE)
 
 TRAIN_DIR = 'flickr_logos_27_dataset'
 TRAIN_IMAGE_DIR = os.path.join(TRAIN_DIR, 'flickr_logos_27_dataset_images')
-CROPPED_IMAGE_DIR = os.path.join(
-    TRAIN_DIR,
-    '_'.join(['flickr_logos_27_dataset_cropped', postfix, 'images']))
+CROPPED_IMAGE_DIR = os.path.join(TRAIN_DIR,
+                                 'flickr_logos_27_dataset_cropped_images')
 
 
 def main():
@@ -28,18 +28,25 @@ def main():
     if not os.path.exists(CROPPED_IMAGE_DIR):
         os.makedirs(CROPPED_IMAGE_DIR)
 
+    # Multiple images are cropped from same file.
+    crop_per_files = defaultdict(int)
     for annot in annot_train:
         fn = annot[0].decode('utf-8')
-        x1, y1, x2, y2 = list(map(int, annot[3:]))
-        im = Image.open(os.path.join(TRAIN_IMAGE_DIR, fn))
+        class_name = annot[1].decode('utf-8')
+        train_subset_class = annot[2].decode('utf-8')
 
-        cx, cy = (x1 + x1) // 2, (y1 + y2) // 2
-        cropped_im = im.crop(
-            (cx - (CNN_IMAGE_SIZE // 2), cy - (CNN_IMAGE_SIZE // 2),
-             cx + (CNN_IMAGE_SIZE // 2), cy + (CNN_IMAGE_SIZE // 2)))
+        crop_per_files[fn] += 1
+        x1, y1, x2, y2 = list(map(int, annot[3:]))
+        if (x2 - x1) <= 0 or (y2 - y1) <= 0:
+            print('Skipping:', fn)
+            continue
+        im = Image.open(os.path.join(TRAIN_IMAGE_DIR, fn))
+        cropped_im = im.crop((x1, y1, x2, y2))
 
         _, ext = os.path.splitext(fn)
-        cropped_fn = '_'.join([fn.split('.')[0], postfix]) + ext
+        cropped_fn = '_'.join(
+            [fn.split('.')[0], class_name, train_subset_class,
+             str(crop_per_files[fn])]) + ext
         cropped_im.save(os.path.join(CROPPED_IMAGE_DIR, cropped_fn))
 
     # check
