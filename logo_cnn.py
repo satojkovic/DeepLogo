@@ -48,8 +48,22 @@ def cropped_inputs():
     read_input = read_flickrlogos27(filename_queue)
 
 
+def convolutional_layer():
+    x = tf.placeholder(tf.float32, [None, None, None])
+
+    w_conv1 = tf.Variable(tf.truncated_normal([5, 5, 1, 48], stddev=0.1))
+    b_conv1 = tf.Variable(tf.constant([48]))
+    x_expanded = tf.expand_dims(x, 3)
+    conv1 = tf.nn.conv2d(x_expanded, w_conv1, strides=(1, 1), padding='SAME')
+    h_conv1 = tf.nn.relu(conv1 + b_conv1)
+    h_pool1 = tf.nn.max_pool(h_conv1,
+                             ksize=[1, 2, 2, 1],
+                             stride=[1, 2, 2, 1],
+                             padding='SAME')
+
+
 def inference():
-    pass
+    x, conv_layer, conv_vars = convolutional_layer()
 
 
 def train():
@@ -62,7 +76,6 @@ def train():
 def main():
     if not tf.gfile.Exists(FLAGS.train_dir):
         print("Not found: %s" % (FLAGS.train_dir))
-    read_flickrlogos27(FLAGS.train_dir)
     train()
 
 
