@@ -51,6 +51,7 @@ def cropped_inputs():
 def convolutional_layer():
     x = tf.placeholder(tf.float32, [None, None, None])
 
+    # first layer
     w_conv1 = tf.Variable(tf.truncated_normal([5, 5, 1, 48], stddev=0.1))
     b_conv1 = tf.Variable(tf.constant([48]))
     x_expanded = tf.expand_dims(x, 3)
@@ -60,6 +61,28 @@ def convolutional_layer():
                              ksize=[1, 2, 2, 1],
                              stride=[1, 2, 2, 1],
                              padding='SAME')
+
+    # second layer
+    w_conv2 = tf.Variable(tf.truncated_normal([5, 5, 48, 64], stddev=0.1))
+    b_conv2 = tf.Variable(tf.constant([64]))
+    conv2 = tf.nn.conv2d(h_pool1, w_conv2, strides=(1, 1), padding='SAME')
+    h_conv2 = tf.nn.relu(conv2 + b_conv2)
+    h_pool2 = tf.nn.max_pool(h_conv2,
+                             ksize=[1, 2, 1, 1],
+                             stride=[1, 2, 1, 1],
+                             padding='SAME')
+
+    # third layer
+    w_conv3 = tf.Variable(tf.truncated_normal([5, 5, 64, 128], stddev=0.1))
+    b_conv3 = tf.constant([128])
+    conv3 = tf.nn.conv2d(h_pool2, w_conv3, strides=(1, 1), padding='SAME')
+    h_conv3 = tf.nn.relu(conv3 + b_conv3)
+    h_pool3 = tf.nn.max_pool(h_conv3,
+                             ksize=[1, 2, 2, 1],
+                             strides=[1, 2, 2, 1],
+                             padding='SAME')
+
+    return x, h_pool3, [w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3]
 
 
 def inference():
