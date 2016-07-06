@@ -74,7 +74,7 @@ def convolutional_layer():
 
     # third layer
     w_conv3 = tf.Variable(tf.truncated_normal([5, 5, 64, 128], stddev=0.1))
-    b_conv3 = tf.constant([128])
+    b_conv3 = tf.Variable(constant([128]))
     conv3 = tf.nn.conv2d(h_pool2, w_conv3, strides=(1, 1), padding='SAME')
     h_conv3 = tf.nn.relu(conv3 + b_conv3)
     h_pool3 = tf.nn.max_pool(h_conv3,
@@ -87,6 +87,12 @@ def convolutional_layer():
 
 def inference():
     x, conv_layer, conv_vars = convolutional_layer()
+
+    # Densely connected layer
+    w_fc1 = tf.Variable(tf.tuncated_normal([32 * 8 * 128, 2048]))
+    b_fc1 = tf.Variable(constant([2048]))
+    conv_layer_flat = tf.reshape(conv_layer, [-1, 32 * 8 * 128])
+    h_fc1 = tf.nn.relu(tf.matmul(conv_layer_flat, w_fc1) + b_fc1)
 
 
 def train():
