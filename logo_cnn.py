@@ -13,6 +13,7 @@ tf.app.flags.DEFINE_string(
 tf.app.flags.DEFINE_integer("max_steps", 10000, "Number of batches to run.")
 tf.app.flags.DEFINE_integer("image_size", 64, "Size of an input image.")
 tf.app.flags.DEFINE_integer("num_classes", 27, "Number of logo classes.")
+tf.app.flags.DEFINE_integer("learning_rate", 0.01, "Learning rate")
 
 
 def read_flickrlogos27(filename_queue):
@@ -105,14 +106,22 @@ def inference():
 
 
 def train():
-    with tf.Graph().as_default():
-        x, y, params = inference()
+    x, y, params = inference()
 
-        y_ = tf.placeholder(tf.float32, [None, FLAGS.num_classes])
+    y_ = tf.placeholder(tf.float32, [None, FLAGS.num_classes])
 
-        logo_loss = tf.nn.softmax_cross_entropy_with_logits(
-            tf.reshape(y[:, 1:], [-1, FLAGS.num_classes]),
-            tf.reshape(y_[:, 1:], [-1, FLAGS.num_classes]))
+    logo_loss = tf.nn.softmax_cross_entropy_with_logits(
+        tf.reshape(y[:, 1:], [-1, FLAGS.num_classes]),
+        tf.reshape(y_[:, 1:], [-1, FLAGS.num_classes]))
+
+    logo_loss = tf.reduce_sum(logo_loss)
+
+    train_step = tf.train.AdamOptimizer(FLAGS.learn_rate).minimize(logo_loss)
+
+    best = tf.argmax(tf.reshape(y[:, 1:], [-1, FLAGS.num_classes]), 2)
+    correct = tf.argmax(tf.reshape(y_[:, 1:], [-1, FLAGS.num_classes]), 2)
+
+    init = tf.initialize_all_variables()
 
         logo_loss = tf.reduce_sum(logo_loss)
 
