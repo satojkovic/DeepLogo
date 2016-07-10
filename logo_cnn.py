@@ -118,8 +118,8 @@ def train():
 
     train_step = tf.train.AdamOptimizer(FLAGS.learn_rate).minimize(logo_loss)
 
-    best = tf.argmax(tf.reshape(y[:, 1:], [-1, FLAGS.num_classes]), 2)
-    correct = tf.argmax(tf.reshape(y_[:, 1:], [-1, FLAGS.num_classes]), 2)
+    best = tf.argmax(tf.reshape(y[:, 1:], [-1, FLAGS.num_classes]), 1)
+    correct = tf.argmax(tf.reshape(y_[:, 1:], [-1, FLAGS.num_classes]), 1)
 
     init = tf.initialize_all_variables()
 
