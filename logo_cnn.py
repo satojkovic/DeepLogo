@@ -4,6 +4,37 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 import os
+import glob
+from PIL import Image
+from skimage.io import imread
+
+CLASS_NAMES = ['Adidas'
+               'Apple'
+               'BMW'
+               'Citroen'
+               'Cocacola'
+               'DHL'
+               'Fedex'
+               'Ferrari'
+               'Ford'
+               'Google'
+               'Heineken'
+               'HP'
+               'Intel'
+               'McDonalds'
+               'Mini'
+               'Nbc'
+               'Nike'
+               'Pepsi'
+               'Porsche'
+               'Puma'
+               'RedBull'
+               'Sprite'
+               'Starbucks'
+               'Texaco'
+               'Unicef'
+               'Vodafone'
+               'Yahoo']
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -105,6 +136,24 @@ def inference():
     return (x, y, conv_vars + [w_fc1, b_fc1, w_fc2, b_fc2])
 
 
+def cls_to_vec(clsname):
+    return np.array([1 if clsname == CLS else 0 for CLS in CLASS_NAMES])
+
+
+def read_data(img_glob):
+    for fname in sorted(glob.glob(img_glob)):
+        img = imread(fname)[:, :, 2].astype(np.float32) / 255.
+        clsname = fname.split('/')[-1].split('_')[1]
+        yield img, cls_to_vec(clsname)
+
+
+def unzip(b):
+    xs, ys = zip(*b)
+    xs = np.array(xs)
+    ys = np.array(ys)
+    return xs, ys
+
+
 def train():
     x, y, params = inference()
 
@@ -123,7 +172,14 @@ def train():
 
     init = tf.initialize_all_variables()
 
-        logo_loss = tf.reduce_sum(logo_loss)
+    with tf.Session() as sess:
+        sess.run(init)
+        test_xs, test_ys = unzip(list(read_data(os.path.join(
+            FLAGS.train_dir, 'flickr_logos_27_dataset_cropped_images',
+            '*.jpg')))[:50])
+
+        feed_dict = {x: test_xs, y: test_ys}
+        sess.run(train_step, feed_dict=feed_dict)
 
 
 def main():
