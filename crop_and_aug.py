@@ -41,6 +41,11 @@ def crop_logos(annot_train):
              str(crop_per_files[fn])]) + ext
         resized_im.save(os.path.join(CROPPED_IMAGE_DIR, cropped_fn))
 
+        # close image and release its memory.
+        im.close()
+        cropped_im.close()
+        resized_im.close()
+
     # check
     org_imgs = [img for img in os.listdir(TRAIN_IMAGE_DIR)]
     cropped_imgs = [img for img in os.listdir(CROPPED_IMAGE_DIR)]
