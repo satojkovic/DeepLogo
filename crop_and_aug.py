@@ -89,6 +89,10 @@ def save_im(annot, cnt, *args):
                             train_subset_class, str(cnt), suffix]) + os.path.splitext(fn)[1]
         im.save(os.path.join(CROPPED_IMAGE_DIR, save_fn))
 
+def close_im(*args):
+    for im in args:
+        im.close()
+
 
 def crop_and_aug(annot_train):
     if not os.path.exists(CROPPED_IMAGE_DIR):
@@ -128,9 +132,7 @@ def crop_and_aug(annot_train):
                 [rotated_im, rotated_suffix])
 
         # close image file
-        im.close()
-        cropped_im.close()
-        
+        close_im(im, cropped_im, shifted_im, scaled_im, rotated_im)
 
     # print results
     org_imgs = [img for img in os.listdir(TRAIN_IMAGE_DIR)]
