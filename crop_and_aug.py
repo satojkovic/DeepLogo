@@ -56,7 +56,8 @@ def crop_logos(annot, im):
     x1, y1, x2, y2 = rect_coord(annot[3:])
     cropped_im = im.crop((x1, y1, x2, y2))
     cropped_im = cropped_im.resize((CNN_IN_WIDTH, CNN_IN_HEIGHT))
-    return cropped_im
+    cropped_suffix = 'p00'
+    return cropped_im, cropped_suffix
 
 
 def rect_coord(annot_part):
@@ -80,13 +81,24 @@ def is_skip(annot_part):
         return False
 
 
+def save_im(annot, cnt, *args):
+    fn, class_name, train_subset_class = parse_annot(annot)
+    for arg in args:
+        im, suffix = arg
+        save_fn = '_'.join([fn.split('.')[0], class_name,
+                            train_subset_class, str(cnt), suffix]) + os.path.splitext(fn)[1]
+        im.save(os.path.join(CROPPED_IMAGE_DIR, save_fn))
+
+
 def crop_and_aug(annot_train):
     if not os.path.exists(CROPPED_IMAGE_DIR):
         os.makedirs(CROPPED_IMAGE_DIR)
 
+    cnt_per_file = defaultdict(int)
     for annot in annot_train:
         # for generating a file name
-        fn, class_name, train_subset_class = parse_annot(annot)
+        fn, _, _ = parse_annot(annot)
+        cnt_per_file[fn] += 1
         
         # skip if width or height equal zero
         if is_skip(annot[3:]):
@@ -97,16 +109,23 @@ def crop_and_aug(annot_train):
         im = Image.open(os.path.join(TRAIN_IMAGE_DIR, fn))
 
         # normal cropping
-        cropped_im = crop_logos(annot, im)
+        cropped_im, cropped_suffix = crop_logos(annot, im)
 
         # augment by shifting a center
-        aug_pos(annot, im)
+        shifted_im, shifted_suffix = aug_pos(annot, im)
 
         # augment by scaling
-        aug_scale(annot, im)
+        scaled_im, scaled_suffix = aug_scale(annot, im)
         
         # augment by rotation
-        aug_rot(annot, im)
+        rotated_im, rotated_suffix = aug_rot(annot, im)
+
+        # save images
+        save_im(annot, cnt_per_file[fn],
+                [cropped_im, cropped_suffix],
+                [shifted_im, shifted_suffix],
+                [scaled_im, scaled_suffix],
+                [rotated_im, rotated_suffix])
 
         # close image file
         im.close()
