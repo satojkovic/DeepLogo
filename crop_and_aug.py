@@ -25,24 +25,23 @@ def parse_annot(annot):
     return fn, class_name, train_subset_class
 
 
-def aug_pos(annot_train, im):
-    for annot in annot_train:
-        fn, class_name, train_subset_class = parse_annot(annot)
-        x1, y1, x2, y2 = list(map(int, annot[3:]))
-        cx = (x2 - x1) // 2
-        cy = (y2 - y1) // 2
-        wid, hgt = (x2 - x1), (y2 - y1)
-        if (x2 - x1) <= 0 or (y2 - y1) <= 0:
-            print('Skipping:', fn)
-            continue
-        im = Image.open(os.path.join(TRAIN_IMAGE_DIR, fn))
-        
-        for sx, sy in product(range(DATA_AUG_POS_SHIFT_MIN, DATA_AUG_POS_SHIFT_MAX), range(DATA_AUG_POS_SHIFT_MIN, DATA_AUG_POS_SHIFT_MAX)):
-            cx = cx + sx
-            cy = cy + sy
-            cropped_im = im.crop((cx - wid//2, cy - hgt//2, cx + wid//2, cy + hgt//2))
-            resized_im = cropped_im.resize(CNN_IN_WIDTH, CNN_IN_HEIGHT)
-            
+def aug_pos(annot, im):
+    aug_pos_ims = []
+    aug_pos_suffixes = []
+
+    x1, y1, x2, y2 = rect_coord(annot[3:])
+    cx, cy, wid, hgt = center_wid_hgt(x1, y1, x2, y2)
+    for sx, sy in product(range(DATA_AUG_POS_SHIFT_MIN, DATA_AUG_POS_SHIFT_MAX), range(DATA_AUG_POS_SHIFT_MIN, DATA_AUG_POS_SHIFT_MAX)):
+        cx = cx + sx
+        cy = cy + sy
+        cropped_im = im.crop((cx - wid // 2, cy - hgt // 2,
+                              cx + wid // 2, cy + hgt // 2))
+        resized_im = cropped_im.resize(CNN_IN_WIDTH, CNN_IN_HEIGHT)
+        aug_pos_ims.append(resized_im)
+        aug_pos_suffixes.append('p' + str(cx) + str(cy))
+
+    return aug_pos_ims, aug_pos_suffixes
+
 
 def aug_scale(annot_train, im):
     pass
@@ -116,7 +115,7 @@ def crop_and_aug(annot_train):
         cropped_im, cropped_suffix = crop_logos(annot, im)
 
         # augment by shifting a center
-        shifted_im, shifted_suffix = aug_pos(annot, im)
+        shifted_ims, shifted_suffixes = aug_pos(annot, im)
 
         # augment by scaling
         scaled_im, scaled_suffix = aug_scale(annot, im)
@@ -127,12 +126,12 @@ def crop_and_aug(annot_train):
         # save images
         save_im(annot, cnt_per_file[fn],
                 [cropped_im, cropped_suffix],
-                [shifted_im, shifted_suffix],
+                [shifted_ims, shifted_suffixes],
                 [scaled_im, scaled_suffix],
                 [rotated_im, rotated_suffix])
 
         # close image file
-        close_im(im, cropped_im, shifted_im, scaled_im, rotated_im)
+        close_im(im, cropped_im, shifted_ims, scaled_im, rotated_im)
 
     # print results
     org_imgs = [img for img in os.listdir(TRAIN_IMAGE_DIR)]
