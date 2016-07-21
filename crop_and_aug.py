@@ -11,6 +11,7 @@ CNN_IN_HEIGHT = 32
 
 DATA_AUG_POS_SHIFT_MIN = -2
 DATA_AUG_POS_SHIFT_MAX = 2
+DATA_AUG_SCALES = [0.9, 1.1]
 
 TRAIN_DIR = 'flickr_logos_27_dataset'
 TRAIN_IMAGE_DIR = os.path.join(TRAIN_DIR, 'flickr_logos_27_dataset_images')
@@ -43,8 +44,22 @@ def aug_pos(annot, im):
     return aug_pos_ims, aug_pos_suffixes
 
 
-def aug_scale(annot_train, im):
-    pass
+def aug_scale(annot, im):
+    aug_scale_ims = []
+    aug_scale_suffixes = []
+
+    x1, y1, x2, y2 = rect_coord(annot[3:])
+    cx, cy, wid, hgt = center_wid_hgt(x1, y1, x2, y2)
+    for s in DATA_AUG_SCALES:
+        w = int(wid * s)
+        h = int(hgt * s)
+        cropped_im = im.crop(cx - w // 2, cy - h // 2,
+                             cx + w // 2, cy + h // 2)
+        resized_im = cropped_im.resize(CNN_IN_WIDTH, CNN_IN_HEIGHT)
+        aug_scale_ims.append(resized_im)
+        aug_scale_suffixes.append('s' + str(s))
+
+    return aug_scale_ims, aug_scale_suffixes
 
 
 def aug_rot(annot_train, im):
@@ -118,7 +133,7 @@ def crop_and_aug(annot_train):
         shifted_ims, shifted_suffixes = aug_pos(annot, im)
 
         # augment by scaling
-        scaled_im, scaled_suffix = aug_scale(annot, im)
+        scaled_ims, scaled_suffixes = aug_scale(annot, im)
         
         # augment by rotation
         rotated_im, rotated_suffix = aug_rot(annot, im)
@@ -127,11 +142,11 @@ def crop_and_aug(annot_train):
         save_im(annot, cnt_per_file[fn],
                 [cropped_im, cropped_suffix],
                 [shifted_ims, shifted_suffixes],
-                [scaled_im, scaled_suffix],
+                [scaled_ims, scaled_suffixes],
                 [rotated_im, rotated_suffix])
 
         # close image file
-        close_im(im, cropped_im, shifted_ims, scaled_im, rotated_im)
+        close_im(im, cropped_im, shifted_ims, scaled_ims, rotated_im)
 
     # print results
     org_imgs = [img for img in os.listdir(TRAIN_IMAGE_DIR)]
