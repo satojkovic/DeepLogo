@@ -25,21 +25,35 @@ def parse_annot(annot):
     train_subset_class = annot[2].decode('utf-8')
     return fn, class_name, train_subset_class
 
+def get_rect(annot):
+    rect = defaultdict(int)
+    x1, y1, x2, y2 = rect_coord(annot[3:])
+    cx, cy, wid, hgt = center_wid_hgt(x1, y1, x2, y2)
+    rect['x1'] = x1
+    rect['y1'] = y1
+    rect['x2'] = x2
+    rect['y2'] = y2
+    rect['cx'] = cx
+    rect['cy'] = cy
+    rect['wid'] = wid
+    rect['hgt'] = hgt
+    return rect
+
 
 def aug_pos(annot, im):
     aug_pos_ims = []
     aug_pos_suffixes = []
 
-    x1, y1, x2, y2 = rect_coord(annot[3:])
-    cx, cy, wid, hgt = center_wid_hgt(x1, y1, x2, y2)
+    rect = get_rect(annot)
     for sx, sy in product(range(DATA_AUG_POS_SHIFT_MIN, DATA_AUG_POS_SHIFT_MAX), range(DATA_AUG_POS_SHIFT_MIN, DATA_AUG_POS_SHIFT_MAX)):
-        cx = cx + sx
-        cy = cy + sy
-        cropped_im = im.crop((cx - wid // 2, cy - hgt // 2,
-                              cx + wid // 2, cy + hgt // 2))
+        cx = rect['cx'] + sx
+        cy = rect['cy'] + sy
+        cropped_im = im.crop((cx - rect['wid'] // 2, cy - rect['hgt'] // 2,
+                              cx + rect['wid'] // 2, cy + rect['hgt'] // 2))
         resized_im = cropped_im.resize(CNN_IN_WIDTH, CNN_IN_HEIGHT)
         aug_pos_ims.append(resized_im)
         aug_pos_suffixes.append('p' + str(cx) + str(cy))
+        cropped_im.close()
 
     return aug_pos_ims, aug_pos_suffixes
 
@@ -48,16 +62,16 @@ def aug_scale(annot, im):
     aug_scale_ims = []
     aug_scale_suffixes = []
 
-    x1, y1, x2, y2 = rect_coord(annot[3:])
-    cx, cy, wid, hgt = center_wid_hgt(x1, y1, x2, y2)
+    rect = get_rect(annot)
     for s in DATA_AUG_SCALES:
-        w = int(wid * s)
-        h = int(hgt * s)
-        cropped_im = im.crop(cx - w // 2, cy - h // 2,
-                             cx + w // 2, cy + h // 2)
+        w = int(rect['wid'] * s)
+        h = int(rect['hgt'] * s)
+        cropped_im = im.crop(rect['cx'] - w // 2, rect['cy'] - h // 2,
+                             rect['cx'] + w // 2, rect['cy'] + h // 2)
         resized_im = cropped_im.resize(CNN_IN_WIDTH, CNN_IN_HEIGHT)
         aug_scale_ims.append(resized_im)
         aug_scale_suffixes.append('s' + str(s))
+        cropped_im.close()
 
     return aug_scale_ims, aug_scale_suffixes
 
