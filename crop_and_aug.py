@@ -17,8 +17,8 @@ DATA_AUG_ROT_MAX = 15
 
 TRAIN_DIR = 'flickr_logos_27_dataset'
 TRAIN_IMAGE_DIR = os.path.join(TRAIN_DIR, 'flickr_logos_27_dataset_images')
-CROPPED_IMAGE_DIR = os.path.join(TRAIN_DIR,
-                                 'flickr_logos_27_dataset_cropped_images')
+CROPPED_AUG_IMAGE_DIR = os.path.join(TRAIN_DIR,
+                                     'flickr_logos_27_dataset_cropped_augmented_images')
 
 
 def parse_annot(annot):
@@ -101,7 +101,7 @@ def crop_logos(annot, im):
     cropped_im = im.crop((x1, y1, x2, y2))
     cropped_im = cropped_im.resize((CNN_IN_WIDTH, CNN_IN_HEIGHT))
     cropped_suffix = 'p00'
-    return cropped_im, cropped_suffix
+    return [cropped_im], [cropped_suffix]
 
 
 def rect_coord(annot_part):
@@ -127,20 +127,21 @@ def is_skip(annot_part):
 
 def save_im(annot, cnt, *args):
     fn, class_name, train_subset_class = parse_annot(annot)
-    for arg in args:
-        im, suffix = arg
-        save_fn = '_'.join([fn.split('.')[0], class_name,
-                            train_subset_class, str(cnt), suffix]) + os.path.splitext(fn)[1]
-        im.save(os.path.join(CROPPED_IMAGE_DIR, save_fn))
+    for i, arg in enumerate(args):
+        for im, suffix in zip(arg[0], arg[1]):
+            save_fn = '_'.join([fn.split('.')[0], class_name,
+                                train_subset_class, str(cnt), suffix]) + os.path.splitext(fn)[1]
+            im.save(os.path.join(CROPPED_AUG_IMAGE_DIR, save_fn))
 
 def close_im(*args):
-    for im in args:
-        im.close()
+    for ims in args:
+        for im in ims:
+            im.close()
 
 
 def crop_and_aug(annot_train):
-    if not os.path.exists(CROPPED_IMAGE_DIR):
-        os.makedirs(CROPPED_IMAGE_DIR)
+    if not os.path.exists(CROPPED_AUG_IMAGE_DIR):
+        os.makedirs(CROPPED_AUG_IMAGE_DIR)
 
     cnt_per_file = defaultdict(int)
     for annot in annot_train:
@@ -157,7 +158,7 @@ def crop_and_aug(annot_train):
         im = Image.open(os.path.join(TRAIN_IMAGE_DIR, fn))
 
         # normal cropping
-        cropped_im, cropped_suffix = crop_logos(annot, im)
+        cropped_ims, cropped_suffixes = crop_logos(annot, im)
 
         # augment by shifting a center
         shifted_ims, shifted_suffixes = aug_pos(annot, im)
@@ -166,21 +167,21 @@ def crop_and_aug(annot_train):
         scaled_ims, scaled_suffixes = aug_scale(annot, im)
         
         # augment by rotation
-        rotated_im, rotated_suffix = aug_rot(annot, im)
+        rotated_ims, rotated_suffixes = aug_rot(annot, im)
 
         # save images
         save_im(annot, cnt_per_file[fn],
-                [cropped_im, cropped_suffix],
+                [cropped_ims, cropped_suffixes],
                 [shifted_ims, shifted_suffixes],
                 [scaled_ims, scaled_suffixes],
                 [rotated_ims, rotated_suffixes])
 
         # close image file
-        close_im(im, cropped_im, shifted_ims, scaled_ims, rotated_ims)
+        close_im([im], cropped_ims, shifted_ims, scaled_ims, rotated_ims)
 
     # print results
     org_imgs = [img for img in os.listdir(TRAIN_IMAGE_DIR)]
-    crop_and_aug_imgs = [img for img in os.listdir(CROPPED_IMAGE_DIR)]
+    crop_and_aug_imgs = [img for img in os.listdir(CROPPED_AUG_IMAGE_DIR)]
     print('original: %d' % (len(org_imgs)))
     print('cropped: %d' % (len(crop_and_aug_imgs)))
 
