@@ -54,7 +54,7 @@ def aug_pos(annot, im):
                               cx + rect['wid'] // 2, cy + rect['hgt'] // 2))
         resized_im = cropped_im.resize((CNN_IN_WIDTH, CNN_IN_HEIGHT))
         aug_pos_ims.append(resized_im)
-        aug_pos_suffixes.append('p' + str(cx) + str(cy))
+        aug_pos_suffixes.append('p' +  str(sx) + str(sy))
         cropped_im.close()
 
     return aug_pos_ims, aug_pos_suffixes
