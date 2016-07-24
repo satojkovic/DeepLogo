@@ -109,8 +109,8 @@ def rect_coord(annot_part):
 
 
 def center_wid_hgt(x1, y1, x2, y2):
-    cx = (x2 - x1) // 2
-    cy = (y2 - y1) // 2
+    cx = x1 + (x2 - x1) // 2
+    cy = y1 + (y2 - y1) // 2
     wid = (x2 - x1)
     hgt = (y2 - y1)
     return cx, cy, wid, hgt
