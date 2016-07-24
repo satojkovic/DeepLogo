@@ -52,7 +52,7 @@ def aug_pos(annot, im):
         cy = rect['cy'] + sy
         cropped_im = im.crop((cx - rect['wid'] // 2, cy - rect['hgt'] // 2,
                               cx + rect['wid'] // 2, cy + rect['hgt'] // 2))
-        resized_im = cropped_im.resize(CNN_IN_WIDTH, CNN_IN_HEIGHT)
+        resized_im = cropped_im.resize((CNN_IN_WIDTH, CNN_IN_HEIGHT))
         aug_pos_ims.append(resized_im)
         aug_pos_suffixes.append('p' + str(cx) + str(cy))
         cropped_im.close()
@@ -68,9 +68,9 @@ def aug_scale(annot, im):
     for s in DATA_AUG_SCALES:
         w = int(rect['wid'] * s)
         h = int(rect['hgt'] * s)
-        cropped_im = im.crop(rect['cx'] - w // 2, rect['cy'] - h // 2,
-                             rect['cx'] + w // 2, rect['cy'] + h // 2)
-        resized_im = cropped_im.resize(CNN_IN_WIDTH, CNN_IN_HEIGHT)
+        cropped_im = im.crop((rect['cx'] - w // 2, rect['cy'] - h // 2,
+                              rect['cx'] + w // 2, rect['cy'] + h // 2))
+        resized_im = cropped_im.resize((CNN_IN_WIDTH, CNN_IN_HEIGHT))
         aug_scale_ims.append(resized_im)
         aug_scale_suffixes.append('s' + str(s))
         cropped_im.close()
@@ -78,16 +78,16 @@ def aug_scale(annot, im):
     return aug_scale_ims, aug_scale_suffixes
 
 
-def aug_rot(annot_train, im):
+def aug_rot(annot, im):
     aug_rot_ims = []
     aug_rot_suffixes = []
 
     rect = get_rect(annot)
     for r in range(DATA_AUG_ROT_MIN, DATA_AUG_ROT_MAX):
         rotated_im = im.rotate(r)
-        cropped_im = rotated_im.crop(rect['cx'] - rect['wid'] // 2, rect['cy'] - rect['hgt'] // 2,
-                                     rect['cx'] + rect['wid'] // 2, rect['cy'] + rect['hgt'] // 2)
-        resized_im = cropped_im.resize(CNN_IN_WIDTH, CNN_IN_HEIGHT)
+        cropped_im = rotated_im.crop((rect['cx'] - rect['wid'] // 2, rect['cy'] - rect['hgt'] // 2,
+                                      rect['cx'] + rect['wid'] // 2, rect['cy'] + rect['hgt'] // 2))
+        resized_im = cropped_im.resize((CNN_IN_WIDTH, CNN_IN_HEIGHT))
         aug_rot_ims.append(resized_im)
         aug_rot_suffixes.append('r' + str(r))
         rotated_im.close()
