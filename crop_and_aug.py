@@ -5,6 +5,8 @@ import os
 from PIL import Image
 from collections import defaultdict
 from itertools import product
+from sklearn.cross_validation import train_test_split
+
 
 CNN_IN_WIDTH = 64
 CNN_IN_HEIGHT = 32
@@ -192,6 +194,10 @@ def crop_and_aug(annot_train):
     return crop_and_aug_imgs
 
 
+def do_train_test_split():
+    pass
+
+
 def main():
     annot_train = np.loadtxt(
         os.path.join(TRAIN_DIR,
@@ -201,6 +207,10 @@ def main():
 
     # normal cropping and data augmentation
     crop_and_aug(annot_train)
+
+    # train_test_split
+    do_train_test_split()
+
 
 if __name__ == '__main__':
     main()
