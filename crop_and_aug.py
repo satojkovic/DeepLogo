@@ -127,11 +127,15 @@ def is_skip(annot_part):
 
 def save_im(annot, cnt, *args):
     fn, class_name, train_subset_class = parse_annot(annot)
+    dst_dir = os.path.join(CROPPED_AUG_IMAGE_DIR, class_name)
+    if not os.path.exists(dst_dir):
+        os.makedirs(dst_dir)
     for i, arg in enumerate(args):
         for im, suffix in zip(arg[0], arg[1]):
             save_fn = '_'.join([fn.split('.')[0], class_name,
                                 train_subset_class, str(cnt), suffix]) + os.path.splitext(fn)[1]
-            im.save(os.path.join(CROPPED_AUG_IMAGE_DIR, save_fn))
+            im.save(os.path.join(dst_dir, save_fn))
+
 
 def close_im(*args):
     for ims in args:
