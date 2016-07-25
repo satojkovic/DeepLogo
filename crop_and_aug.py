@@ -205,7 +205,7 @@ def main():
         dtype='a')
     print('train_annotation: %d, %d ' % (annot_train.shape))
 
-    # normal cropping and data augmentation
+    # cropping and data augmentation
     crop_and_aug(annot_train)
 
     # train_test_split
