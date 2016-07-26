@@ -6,6 +6,7 @@ from PIL import Image
 from collections import defaultdict
 from itertools import product
 from sklearn.cross_validation import train_test_split
+import pandas as pd
 
 
 CNN_IN_WIDTH = 64
@@ -21,6 +22,7 @@ TRAIN_DIR = 'flickr_logos_27_dataset'
 TRAIN_IMAGE_DIR = os.path.join(TRAIN_DIR, 'flickr_logos_27_dataset_images')
 CROPPED_AUG_IMAGE_DIR = os.path.join(TRAIN_DIR,
                                      'flickr_logos_27_dataset_cropped_augmented_images')
+ANNOT_FILE = 'flickr_logos_27_dataset_training_set_annotation.txt'
 
 
 def parse_annot(annot):
@@ -195,14 +197,14 @@ def crop_and_aug(annot_train):
 
 
 def do_train_test_split():
-    pass
+    class_names = [cls for cls in os.listdir(CROPPED_AUG_IMAGE_DIR)]
+    for class_name in class_names:
+        imgs = [img for img in os.listdir(os.path.join(CROPPED_AUG_IMAGE_DIR, class_name))]
+        test_imgs, train_imgs = train_test_split(imgs)
 
 
 def main():
-    annot_train = np.loadtxt(
-        os.path.join(TRAIN_DIR,
-                     'flickr_logos_27_dataset_training_set_annotation.txt'),
-        dtype='a')
+    annot_train = np.loadtxt(os.path.join(TRAIN_DIR, ANNOT_FILE), dtype='a')
     print('train_annotation: %d, %d ' % (annot_train.shape))
 
     # cropping and data augmentation
