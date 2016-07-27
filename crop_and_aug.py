@@ -6,7 +6,7 @@ from PIL import Image
 from collections import defaultdict
 from itertools import product
 from sklearn.cross_validation import train_test_split
-import pandas as pd
+import shutil
 
 
 CNN_IN_WIDTH = 64
@@ -199,8 +199,21 @@ def crop_and_aug(annot_train):
 def do_train_test_split():
     class_names = [cls for cls in os.listdir(CROPPED_AUG_IMAGE_DIR)]
     for class_name in class_names:
-        imgs = [img for img in os.listdir(os.path.join(CROPPED_AUG_IMAGE_DIR, class_name))]
-        test_imgs, train_imgs = train_test_split(imgs)
+        imgs = [img for img in os.listdir(os.path.join(CROPPED_AUG_IMAGE_DIR,
+                                                       class_name))]
+        # train=0.75, test=0.25
+        train_imgs, test_imgs = train_test_split(imgs)
+        # move to train or test directory
+        os.makedirs(os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'train'))
+        os.makedirs(os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'test'))
+        for img in train_imgs:
+            dst = os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'train')
+            src = os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, img)
+            shutil.move(src, dst)
+        for img in test_imgs:
+            dst = os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'test')
+            src = os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, img)
+            shutil.move(src, dst)
 
 
 def main():
