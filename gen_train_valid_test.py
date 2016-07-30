@@ -14,6 +14,10 @@ TRAIN_DIR = 'flickr_logos_27_dataset'
 CROPPED_AUG_IMAGE_DIR = os.path.join(
     TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
 
+TRAIN_SIZE = 100000  # prune the training data as needed. There are 163169 training files.
+VALID_SIZE = 10000
+TEST_SIZE = 10000  # There are 54425 test files.
+
 
 def load_logo(data_dir):
     image_files = os.listdir(data_dir)
@@ -61,6 +65,49 @@ def maybe_pickle(data_dirs, force=False):
         except Exception as e:
             print('Unable to save data to', set_filename, ':', e)
     return dataset_names
+
+
+def make_arrays(nb_rows, image_width, image_height, image_ch=1):
+    if nb_rows:
+        dataset = np.ndarray(
+            (nb_rows, image_height, image_width, image_ch), dtype=np.float32)
+        labels = np.ndarray(nb_rows, dtype=np.int32)
+    else:
+        dataset, labels = None, None
+    return dataset, labels
+
+
+def merge_datasets(pickle_files, train_size, valid_size=0):
+    num_classes = len(pickle_files)
+    valid_dataset, valid_labels = make_arrays(valid_size, CNN_IN_WIDTH,
+                                              CNN_IN_HEIGHT, CNN_IN_CH)
+    train_dataset, train_labels = make_arrays(train_size, CNN_IN_WIDTH,
+                                              CNN_IN_HEIGHT, CNN_IN_CH)
+    vsize_per_class = valid_size // num_classes
+    tsize_per_class = train_size // num_classes
+
+    start_v, start_t = 0, 0
+    end_v, end_t = vsize_per_class, tsize_per_class
+    end_l = vsize_per_class + tsize_per_class
+    for label, pickle_file in enumerate(pickle_files):
+        try:
+            with open(pickle_file, 'rb') as f:
+                logo_set = pickle.load(f)
+                np.random.shuffle(logo_set)
+                if valid_dataset is not None:
+                    valid_logo = logo_set[:vsize_per_class, :, :, :]
+                    valid_dataset[start_v:end_v, :, :, :] = valid_logo
+                    valid_labels[start_v:end_v] = label
+                    start_v += vsize_per_class
+                    end_v += vsize_per_class
+                train_logo = logo_set[vsize_per_class:end_l, :, :, :]
+                train_dataset[start_t:end_t, :, :, :] = train_logo
+                train_labels[start_t:end_t] = label
+                start_t += tsize_per_class
+                end_t += tsize_per_class
+        except Exception as e:
+            print('Unable to process data from', pickle_file, ':', e)
+            raise
 
 
 def main():
