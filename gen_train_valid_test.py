@@ -5,6 +5,7 @@ import numpy as np
 import os
 from scipy import ndimage
 from six.moves import cPickle as pickle
+import re
 
 CNN_IN_WIDTH = 64
 CNN_IN_HEIGHT = 32
@@ -59,11 +60,11 @@ def maybe_pickle(data_dirs, force=False):
         else:
             print('Pickling %s.' % set_filename)
             dataset = load_logo(dir)
-        try:
-            with open(set_filename, 'wb') as f:
-                pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
-        except Exception as e:
-            print('Unable to save data to', set_filename, ':', e)
+            try:
+                with open(set_filename, 'wb') as f:
+                    pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
+            except Exception as e:
+                print('Unable to save data to', set_filename, ':', e)
     return dataset_names
 
 
@@ -116,6 +117,7 @@ def main():
         for class_name in os.listdir(CROPPED_AUG_IMAGE_DIR)
         for train_test_dir in os.listdir(
             os.path.join(CROPPED_AUG_IMAGE_DIR, class_name))
+        if not re.search('\.pickle', train_test_dir)
     ]
 
     train_datasets = maybe_pickle(train_test_dirs[1::2])
