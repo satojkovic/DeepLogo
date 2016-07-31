@@ -15,9 +15,9 @@ TRAIN_DIR = 'flickr_logos_27_dataset'
 CROPPED_AUG_IMAGE_DIR = os.path.join(
     TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
 
-TRAIN_SIZE = 100000  # prune the training data as needed. There are 163169 training files.
-VALID_SIZE = 10000
-TEST_SIZE = 10000  # There are 54425 test files.
+TRAIN_SIZE = 50000  # prune the training data as needed. There are 163169 training files.
+VALID_SIZE = 5000
+TEST_SIZE = 5000  # There are 54425 test files.
 
 
 def load_logo(data_dir):
@@ -109,6 +109,7 @@ def merge_datasets(pickle_files, train_size, valid_size=0):
         except Exception as e:
             print('Unable to process data from', pickle_file, ':', e)
             raise
+    return valid_dataset, valid_labels, train_dataset, train_labels
 
 
 def main():
@@ -122,6 +123,10 @@ def main():
 
     train_datasets = maybe_pickle(train_test_dirs[1::2])
     test_datasets = maybe_pickle(train_test_dirs[0::2])
+
+    valid_dataset, valid_labels, train_dataset, train_labels = merge_datasets(
+        train_datasets, TRAIN_SIZE, VALID_SIZE)
+    _, _, test_dataset, test_labels = merge_datasets(test_datasets, TEST_SIZE)
 
 
 if __name__ == '__main__':
