@@ -14,6 +14,7 @@ PIXEL_DEPTH = 255.0
 TRAIN_DIR = 'flickr_logos_27_dataset'
 CROPPED_AUG_IMAGE_DIR = os.path.join(
     TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
+PICKLE_FILENAME = 'deep_logo.pickle'
 
 TRAIN_SIZE = 50000  # prune the training data as needed. There are 163169 training files.
 VALID_SIZE = 5000
@@ -112,6 +113,25 @@ def merge_datasets(pickle_files, train_size, valid_size=0):
     return valid_dataset, valid_labels, train_dataset, train_labels
 
 
+def save_pickle(train_dataset, train_labels, valid_dataset, valid_labels,
+                test_dataset, test_labels):
+    try:
+        f = open(PICKLE_FILENAME, 'wb')
+        save = {
+            'train_dataset': train_dataset,
+            'train_labels': train_labels,
+            'valid_dataset': valid_dataset,
+            'valid_labels': valid_labels,
+            'test_dataset': test_dataset,
+            'test_labels': test_labels,
+        }
+        pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
+        f.close()
+    except Exception as e:
+        print('Unable to save data to', PICKLE_FILENAME, ':', e)
+        raise
+
+
 def main():
     train_test_dirs = [
         os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, train_test_dir)
@@ -127,6 +147,11 @@ def main():
     valid_dataset, valid_labels, train_dataset, train_labels = merge_datasets(
         train_datasets, TRAIN_SIZE, VALID_SIZE)
     _, _, test_dataset, test_labels = merge_datasets(test_datasets, TEST_SIZE)
+
+    save_pickle(train_dataset, train_labels, valid_dataset, valid_labels,
+                test_dataset, test_labels)
+    statinfo = os.stat(PICKLE_FILENAME)
+    print('Compressed pickle size:', statinfo.st_size)
 
 
 if __name__ == '__main__':
