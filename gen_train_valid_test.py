@@ -132,6 +132,13 @@ def save_pickle(train_dataset, train_labels, valid_dataset, valid_labels,
         raise
 
 
+def randomize(dataset, labels):
+    permutation = np.random.permutation(labels.shape[0])
+    shuffled_dataset = dataset[permutation, :, :]
+    shuffled_labels = labels[permutation]
+    return shuffled_dataset, shuffled_labels
+
+
 def main():
     train_test_dirs = [
         os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, train_test_dir)
@@ -147,6 +154,10 @@ def main():
     valid_dataset, valid_labels, train_dataset, train_labels = merge_datasets(
         train_datasets, TRAIN_SIZE, VALID_SIZE)
     _, _, test_dataset, test_labels = merge_datasets(test_datasets, TEST_SIZE)
+
+    train_dataset, train_labels = randomize(train_dataset, train_labels)
+    valid_dataset, valid_labels = randomize(valid_dataset, valid_labels)
+    test_dataset, test_labels = randomize(test_dataset, test_labels)
 
     save_pickle(train_dataset, train_labels, valid_dataset, valid_labels,
                 test_dataset, test_labels)
