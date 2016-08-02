@@ -51,6 +51,14 @@ tf.app.flags.DEFINE_integer("num_channels", 3,
 PICKLE_FILENAME = 'deep_logo.pickle'
 
 
+def reformat(dataset, labels):
+    dataset = dataset.reshape((-1, FLAGS.image_width, FLAGS.image_height,
+                               FLAGS.num_channels)).astype(np.float32)
+    labels = (
+        np.arange(FLAGS.num_classes) == labels[:, None]).astype(np.float32)
+    return dataset, labels
+
+
 def main():
     with open(PICKLE_FILENAME, 'rb') as f:
         save = pickle.load(f)
@@ -64,6 +72,13 @@ def main():
         print('Training set', train_dataset.shape, train_labels.shape)
         print('Valid set', valid_dataset.shape, valid_labels.shape)
         print('Test set', test_dataset.shape, test_labels.shape)
+
+    train_dataset, train_labels = reformat(train_dataset, train_labels)
+    valid_dataset, valid_labels = reformat(valid_dataset, valid_labels)
+    test_dataset, test_labels = reformat(test_dataset, test_labels)
+    print('Training set', train_dataset.shape, train_labels.shape)
+    print('Valid set', valid_dataset.shape, valid_labels.shape)
+    print('Test set', test_dataset.shape, test_labels.shape)
 
 
 if __name__ == '__main__':
