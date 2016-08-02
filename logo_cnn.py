@@ -3,10 +3,8 @@
 from __future__ import print_function
 import tensorflow as tf
 import numpy as np
-import os
-import glob
-from PIL import Image
-from skimage.io import imread
+from six.moves import cPickle as pickle
+from six.moves import range
 
 CLASS_NAMES = ['Adidas'
                'Apple'
@@ -47,26 +45,25 @@ tf.app.flags.DEFINE_integer("image_height", 32, "A height of an input image.")
 tf.app.flags.DEFINE_integer("num_classes", 27, "Number of logo classes.")
 tf.app.flags.DEFINE_integer("learning_rate", 0.01, "Learning rate")
 tf.app.flags.DEFINE_integer("batch_size", 16, "A batch size")
-tf.app.flags.DEFINE_integer("num_channels", 3, "A number of channels of an input image.")
+tf.app.flags.DEFINE_integer("num_channels", 3,
+                            "A number of channels of an input image.")
 
-
-def train():
-    graph = tf.Graph()
-    with graph.as_default():
-        tf_train_dataset = tf.placeholder(tf.float32, shape=(FLAGS.batch_size,
-                                                             FLAGS.image_width,
-                                                             FLAGS.image_height,
-                                                             FLAGS.num_channels))
-        tf_train_labels = tf.placeholder(tf.float32, shape=(FLAGS.batch_size,
-                                                            FLAGS.num_classes))
-        tf_valid_dataset = tf.constant(valid_dataset)
-        tf_test_dataset = tf.constant(test_dataset)
+PICKLE_FILENAME = 'deep_logo.pickle'
 
 
 def main():
-    if not tf.gfile.Exists(FLAGS.train_dir):
-        print("Not found: %s" % (FLAGS.train_dir))
-    train()
+    with open(PICKLE_FILENAME, 'rb') as f:
+        save = pickle.load(f)
+        train_dataset = save['train_dataset']
+        train_labels = save['train_labels']
+        valid_dataset = save['valid_dataset']
+        valid_labels = save['valid_labels']
+        test_dataset = save['test_dataset']
+        test_labels = save['test_labels']
+        del save
+        print('Training set', train_dataset.shape, train_labels.shape)
+        print('Valid set', valid_dataset.shape, valid_labels.shape)
+        print('Test set', test_dataset.shape, test_labels.shape)
 
 
 if __name__ == '__main__':
