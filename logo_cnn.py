@@ -51,6 +51,11 @@ tf.app.flags.DEFINE_integer("num_channels", 3,
 PICKLE_FILENAME = 'deep_logo.pickle'
 
 
+def accuracy(predictions, labels):
+    return (100 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1)) /
+            predictions.shape[0])
+
+
 def reformat(dataset, labels):
     dataset = dataset.reshape((-1, FLAGS.image_width, FLAGS.image_height,
                                FLAGS.num_channels)).astype(np.float32)
