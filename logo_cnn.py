@@ -85,6 +85,19 @@ def main():
     print('Valid set', valid_dataset.shape, valid_labels.shape)
     print('Test set', test_dataset.shape, test_labels.shape)
 
+    # Training model
+    graph = tf.Graph()
+    with graph.as_default():
+        # Input data
+        tf_train_dataset = tf.placeholder(
+            tf.float32,
+            shape=(FLAGS.batch_size, FLAGS.image_width, FLAGS.image_width,
+                   FLAGS.num_channels))
+        tf_train_labels = tf.placeholder(
+            tf.float32, shape=(FLAGS.batch_size, FLAGS.num_classes))
+        tf_valid_dataset = tf.constant(valid_dataset)
+        tf_test_dataset = tf.constant(test_dataset)
+
 
 if __name__ == '__main__':
     main()
