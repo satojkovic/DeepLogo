@@ -6,34 +6,6 @@ import numpy as np
 from six.moves import cPickle as pickle
 from six.moves import range
 
-CLASS_NAMES = ['Adidas'
-               'Apple'
-               'BMW'
-               'Citroen'
-               'Cocacola'
-               'DHL'
-               'Fedex'
-               'Ferrari'
-               'Ford'
-               'Google'
-               'Heineken'
-               'HP'
-               'Intel'
-               'McDonalds'
-               'Mini'
-               'Nbc'
-               'Nike'
-               'Pepsi'
-               'Porsche'
-               'Puma'
-               'RedBull'
-               'Sprite'
-               'Starbucks'
-               'Texaco'
-               'Unicef'
-               'Vodafone'
-               'Yahoo']
-
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string(
