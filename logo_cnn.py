@@ -160,6 +160,29 @@ def main():
         valid_prediction = tf.nn.softmax(model(tf_valid_dataset))
         test_prediction = tf.nn.softmax(model(tf_test_dataset))
 
+    # Do training
+    with tf.Session(graph=graph) as session:
+        tf.initialize_all_variables().run()
+        print('initialized')
+        for step in range(FLAGS.max_steps):
+            offset = (step * FLAGS.batch_size) % (
+                train_labels.shape[0] - FLAGS.batch_size)
+            batch_data = train_dataset[offset:(offset + FLAGS.batch_size
+                                               ), :, :, :]
+            batch_labels = train_labels[offset:(offset + FLAGS.batch_size), :]
+            feed_dict = {tf_train_dataset: batch_data,
+                         tf_train_labels: batch_labels}
+            _, l, predictions = session.run(
+                [optimizer, loss, train_prediction], feed_dict=feed_dict)
+            if step % 50 == 0:
+                print('Minibatch loss at step %d: %f' % (step, l))
+                print('Minibatch accuracy: %.1f%%' % accuracy(predictions,
+                                                              batch_labels))
+                print('Validation accuracy: %.1f%%' %
+                      accuracy(valid_prediction.eval(), valid_labels))
+        print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(),
+                                                 test_labels))
+
 
 if __name__ == '__main__':
     main()
