@@ -134,8 +134,11 @@ def main():
 
         logits = model(tf_train_dataset, w_conv1, b_conv1, w_conv2, b_conv2,
                        w_conv3, b_conv3, w_fc1, b_fc1, w_fc2, b_fc2)
-        loss = tf.reduce_sum(
-            tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
+        with tf.name_scope('loss'):
+            loss = tf.reduce_sum(
+                tf.nn.softmax_cross_entropy_with_logits(logits,
+                                                        tf_train_labels))
+            tf.scalar_summary('loss', loss)
         optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(loss)
 
         # Predictions for the training, validation, and test data
@@ -146,9 +149,13 @@ def main():
         test_prediction = tf.nn.softmax(
             model(tf_test_dataset, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3,
                   b_conv3, w_fc1, b_fc1, w_fc2, b_fc2))
+        # Merge all summaries
+        merged = tf.merge_all_summaries()
+        train_writer = tf.train.SummaryWriter(FLAGS.train_dir + '/train')
 
     # Do training
     with tf.Session(graph=graph) as session:
+        # Summary writer
         tf.initialize_all_variables().run()
         print('initialized')
         for step in range(FLAGS.max_steps):
@@ -162,6 +169,9 @@ def main():
             _, l, predictions = session.run(
                 [optimizer, loss, train_prediction], feed_dict=feed_dict)
             if step % 50 == 0:
+                summary, _ = session.run([merged, optimizer],
+                                         feed_dict=feed_dict)
+                train_writer.add_summary(summary, step)
                 print('Minibatch loss at step %d: %f' % (step, l))
                 print('Minibatch accuracy: %.1f%%' % accuracy(predictions,
                                                               batch_labels))
