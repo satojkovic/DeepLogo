@@ -143,6 +143,12 @@ def main():
 
         # Predictions for the training, validation, and test data
         train_prediction = tf.nn.softmax(logits)
+        correct_pred = tf.equal(
+            tf.argmax(train_prediction, 1), tf.argmax(tf_train_labels, 1))
+        with tf.name_scope('accuracy'):
+            acc = tf.reduce_sum(tf.cast(correct_pred, tf.float32))
+        tf.scalar_summary('accuracy', acc)
+
         valid_prediction = tf.nn.softmax(
             model(tf_valid_dataset, w_conv1, b_conv1, w_conv2, b_conv2,
                   w_conv3, b_conv3, w_fc1, b_fc1, w_fc2, b_fc2))
