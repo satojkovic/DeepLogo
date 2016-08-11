@@ -152,6 +152,9 @@ def main():
         merged = tf.merge_all_summaries()
         train_writer = tf.train.SummaryWriter(FLAGS.train_dir + '/train')
 
+        # Add ops to save and restore all the variables
+        saver = tf.train.Saver()
+
     # Do training
     with tf.Session(graph=graph) as session:
         # Summary writer
@@ -178,6 +181,10 @@ def main():
                       accuracy(valid_prediction.eval(), valid_labels))
         print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(),
                                                  test_labels))
+
+        # Save the variables to disk.
+        save_path = saver.save(session, "model.ckpt")
+        print("Model saved in file: %s" % save_path)
 
 
 if __name__ == '__main__':
