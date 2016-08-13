@@ -23,9 +23,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import tensorflow as tf
+import numpy as np
+import os
+
+FLAGS = tf.flags.FLAGS
+tf.app.flags.DEFINE_string(
+    "test_dir", "flickr_logos_27_dataset/flickr_logos_27_dataset_images",
+    "Directory")
+
 
 def main():
-    pass
+    # Select a test image from a test directory
+    test_images = [test_image for test_image in os.listdir(FLAGS.test_dir)]
+    test_image = np.random.choice(test_images, 1)[0]
+    print("Test image:", test_image)
 
 
 if __name__ == '__main__':
