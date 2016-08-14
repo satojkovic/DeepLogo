@@ -27,6 +27,7 @@ import tensorflow as tf
 import numpy as np
 from six.moves import cPickle as pickle
 from six.moves import range
+import sys
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -94,6 +95,17 @@ def model(data, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
 
 
 def main():
+    if len(sys.argv) > 1:
+        f = np.load(sys.argv[1])
+
+        # f.files has unordered keys ['arr_8', 'arr_9', 'arr_6'...]
+        # Sorting keys by value of numbers
+        initial_weights = [f[n]
+                           for n in sorted(
+                               f.files, key=lambda s: int(s[4:]))]
+    else:
+        initial_weights = None
+
     with open(PICKLE_FILENAME, 'rb') as f:
         save = pickle.load(f)
         train_dataset = save['train_dataset']
@@ -122,25 +134,34 @@ def main():
             tf.truncated_normal(
                 [FLAGS.patch_size, FLAGS.patch_size, FLAGS.num_channels, 48],
                 stddev=0.1))
-        b_conv1 = tf.constant(0.1, shape=[48])
+        b_conv1 = tf.Variable(tf.constant(0.1, shape=[48]))
 
         w_conv2 = tf.Variable(
             tf.truncated_normal(
                 [FLAGS.patch_size, FLAGS.patch_size, 48, 64], stddev=0.1))
-        b_conv2 = tf.constant(0.1, shape=[64])
+        b_conv2 = tf.Variable(tf.constant(0.1, shape=[64]))
 
         w_conv3 = tf.Variable(
             tf.truncated_normal(
                 [FLAGS.patch_size, FLAGS.patch_size, 64, 128], stddev=0.1))
-        b_conv3 = tf.constant(0.1, shape=[128])
+        b_conv3 = tf.Variable(tf.constant(0.1, shape=[128]))
 
         w_fc1 = tf.Variable(
             tf.truncated_normal(
                 [16 * 4 * 128, 2048], stddev=0.1))
-        b_fc1 = tf.constant(0.1, shape=[2048])
+        b_fc1 = tf.Variable(tf.constant(0.1, shape=[2048]))
 
         w_fc2 = tf.Variable(tf.truncated_normal([2048, FLAGS.num_classes]))
-        b_fc2 = tf.constant(0.1, shape=[FLAGS.num_classes])
+        b_fc2 = tf.Variable(tf.constant(0.1, shape=[FLAGS.num_classes]))
+
+        # Params
+        params = [w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
+                  b_fc1, w_fc2, b_fc2]
+
+        # Initial weights
+        if initial_weights is not None:
+            assert len(params) == len(initial_weights)
+            assign_ops = [w.assign(v) for w, v in zip(params, initial_weights)]
 
         # Input data
         tf_train_dataset = tf.placeholder(
@@ -151,10 +172,6 @@ def main():
             tf.float32, shape=(FLAGS.batch_size, FLAGS.num_classes))
         tf_valid_dataset = tf.constant(valid_dataset)
         tf_test_dataset = tf.constant(test_dataset)
-
-        # Params
-        params = [w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
-                  b_fc1, w_fc2, b_fc2]
 
         # Training computation
         logits = model(tf_train_dataset, w_conv1, b_conv1, w_conv2, b_conv2,
@@ -183,9 +200,12 @@ def main():
 
     # Do training
     with tf.Session(graph=graph) as session:
-        # Summary writer
         tf.initialize_all_variables().run()
-        print('initialized')
+        if initial_weights is not None:
+            session.run(assign_ops)
+            print('initialized by pre-learned values')
+        else:
+            print('initialized')
         for step in range(FLAGS.max_steps):
             offset = (step * FLAGS.batch_size) % (
                 train_labels.shape[0] - FLAGS.batch_size)
