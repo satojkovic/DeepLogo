@@ -152,6 +152,10 @@ def main():
         tf_valid_dataset = tf.constant(valid_dataset)
         tf_test_dataset = tf.constant(test_dataset)
 
+        # Params
+        params = [w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
+                  b_fc1, w_fc2, b_fc2]
+
         # Training computation
         logits = model(tf_train_dataset, w_conv1, b_conv1, w_conv2, b_conv2,
                        w_conv3, b_conv3, w_fc1, b_fc1, w_fc2, b_fc2)
@@ -190,17 +194,23 @@ def main():
             batch_labels = train_labels[offset:(offset + FLAGS.batch_size), :]
             feed_dict = {tf_train_dataset: batch_data,
                          tf_train_labels: batch_labels}
-            _, l, predictions = session.run(
-                [optimizer, loss, train_prediction], feed_dict=feed_dict)
-            if step % 50 == 0:
-                summary, _ = session.run([merged, optimizer],
-                                         feed_dict=feed_dict)
-                train_writer.add_summary(summary, step)
-                print('Minibatch loss at step %d: %f' % (step, l))
-                print('Minibatch accuracy: %.1f%%' % accuracy(predictions,
-                                                              batch_labels))
-                print('Validation accuracy: %.1f%%' %
-                      accuracy(valid_prediction.eval(), valid_labels))
+            try:
+                _, l, predictions = session.run(
+                    [optimizer, loss, train_prediction], feed_dict=feed_dict)
+                if step % 50 == 0:
+                    summary, _ = session.run([merged, optimizer],
+                                             feed_dict=feed_dict)
+                    train_writer.add_summary(summary, step)
+                    print('Minibatch loss at step %d: %f' % (step, l))
+                    print('Minibatch accuracy: %.1f%%' %
+                          accuracy(predictions, batch_labels))
+                    print('Validation accuracy: %.1f%%' %
+                          accuracy(valid_prediction.eval(), valid_labels))
+            except KeyboardInterrupt:
+                last_weights = [p.eval() for p in params]
+                np.savez("weights.npz", *last_weights)
+                return last_weights
+
         print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(),
                                                  test_labels))
 
