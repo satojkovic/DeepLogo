@@ -27,6 +27,7 @@ import tensorflow as tf
 import numpy as np
 import os
 from PIL import Image
+import sys
 
 CLASS_NAME = ['Adidas', 'Apple', 'BMW', 'Citroen', 'Cocacola', 'DHL', 'Fedex',
               'Ferrari', 'Ford', 'Google', 'HP', 'Heineken', 'Intel',
@@ -81,13 +82,21 @@ def model(data, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
 
 
 def main():
-    # Select a test image from a test directory
-    test_images_fn = [test_image for test_image in os.listdir(FLAGS.test_dir)]
-    test_image_fn = np.random.choice(test_images_fn, 1)[0]
+    if len(sys.argv) > 1:
+        test_image_fn = sys.argv[1]
+        if not os.path.exists(test_image_fn):
+            print("Not found:", test_image_fn)
+            sys.exit(-1)
+    else:
+        # Select a test image from a test directory
+        test_images_fn = [test_image
+                          for test_image in os.listdir(FLAGS.test_dir)]
+        test_image_fn = np.random.choice(test_images_fn, 1)[0]
+        test_image_fn = os.path.join(FLAGS.test_dir, test_image_fn)
     print("Test image:", test_image_fn)
 
     # Open and resize a test image
-    test_image = Image.open(os.path.join(FLAGS.test_dir, test_image_fn))
+    test_image = Image.open(test_image_fn)
     test_image = test_image.resize((FLAGS.image_width, FLAGS.image_height))
     test_image = np.reshape(test_image,
                             (1, FLAGS.image_width, FLAGS.image_height,
