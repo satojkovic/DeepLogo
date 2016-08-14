@@ -101,25 +101,25 @@ def main():
             tf.truncated_normal(
                 [FLAGS.patch_size, FLAGS.patch_size, FLAGS.num_channels, 48],
                 stddev=0.1))
-        b_conv1 = tf.constant(0.1, shape=[48])
+        b_conv1 = tf.Variable(tf.constant(0.1, shape=[48]))
 
         w_conv2 = tf.Variable(
             tf.truncated_normal(
                 [FLAGS.patch_size, FLAGS.patch_size, 48, 64], stddev=0.1))
-        b_conv2 = tf.constant(0.1, shape=[64])
+        b_conv2 = tf.Variable(tf.constant(0.1, shape=[64]))
 
         w_conv3 = tf.Variable(
             tf.truncated_normal(
                 [FLAGS.patch_size, FLAGS.patch_size, 64, 128], stddev=0.1))
-        b_conv3 = tf.constant(0.1, shape=[128])
+        b_conv3 = tf.Variable(tf.constant(0.1, shape=[128]))
 
         w_fc1 = tf.Variable(
             tf.truncated_normal(
                 [16 * 4 * 128, 2048], stddev=0.1))
-        b_fc1 = tf.constant(0.1, shape=[2048])
+        b_fc1 = tf.Variable(tf.constant(0.1, shape=[2048]))
 
         w_fc2 = tf.Variable(tf.truncated_normal([2048, FLAGS.num_classes]))
-        b_fc2 = tf.constant(0.1, shape=[FLAGS.num_classes])
+        b_fc2 = tf.Variable(tf.constant(0.1, shape=[FLAGS.num_classes]))
 
         # A placeholder for a test image
         tf_test_image = tf.constant(test_image)
