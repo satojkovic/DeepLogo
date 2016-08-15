@@ -94,18 +94,7 @@ def model(data, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
     return out
 
 
-def main():
-    if len(sys.argv) > 1:
-        f = np.load(sys.argv[1])
-
-        # f.files has unordered keys ['arr_8', 'arr_9', 'arr_6'...]
-        # Sorting keys by value of numbers
-        initial_weights = [f[n]
-                           for n in sorted(
-                               f.files, key=lambda s: int(s[4:]))]
-    else:
-        initial_weights = None
-
+def read_data():
     with open(PICKLE_FILENAME, 'rb') as f:
         save = pickle.load(f)
         train_dataset = save['train_dataset']
@@ -119,9 +108,28 @@ def main():
         print('Valid set', valid_dataset.shape, valid_labels.shape)
         print('Test set', test_dataset.shape, test_labels.shape)
 
-    train_dataset, train_labels = reformat(train_dataset, train_labels)
-    valid_dataset, valid_labels = reformat(valid_dataset, valid_labels)
-    test_dataset, test_labels = reformat(test_dataset, test_labels)
+    return [train_dataset, valid_dataset,
+            test_dataset], [train_labels, valid_labels, test_labels]
+
+
+def main():
+    if len(sys.argv) > 1:
+        f = np.load(sys.argv[1])
+
+        # f.files has unordered keys ['arr_8', 'arr_9', 'arr_6'...]
+        # Sorting keys by value of numbers
+        initial_weights = [f[n]
+                           for n in sorted(
+                               f.files, key=lambda s: int(s[4:]))]
+    else:
+        initial_weights = None
+
+    # read input data
+    dataset, labels = read_data()
+
+    train_dataset, train_labels = reformat(dataset[0], labels[0])
+    valid_dataset, valid_labels = reformat(dataset[1], labels[1])
+    test_dataset, test_labels = reformat(dataset[2], labels[2])
     print('Training set', train_dataset.shape, train_labels.shape)
     print('Valid set', valid_dataset.shape, valid_labels.shape)
     print('Test set', test_dataset.shape, test_labels.shape)
