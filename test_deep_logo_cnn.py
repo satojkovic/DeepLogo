@@ -176,7 +176,11 @@ def main():
         tf.initialize_all_variables().run()
         if initial_weights is not None:
             session.run(assign_ops)
-            print('initialized by pre-learned values')
+            print('initialized by pre-learned weights')
+        elif os.path.exists("model.ckpt"):
+            save_path = "model.ckpt"
+            saver.restore(session, save_path)
+            print('Model restored')
         else:
             print('initialized')
         pred = session.run([test_pred])
