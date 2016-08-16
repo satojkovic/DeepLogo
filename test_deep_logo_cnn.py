@@ -26,9 +26,9 @@
 import tensorflow as tf
 import numpy as np
 import os
-from PIL import Image
 import sys
 from scipy import ndimage
+import re
 
 CLASS_NAME = ['Adidas', 'Apple', 'BMW', 'Citroen', 'Cocacola', 'DHL', 'Fedex',
               'Ferrari', 'Ford', 'Google', 'HP', 'Heineken', 'Intel',
@@ -38,12 +38,12 @@ CLASS_NAME = ['Adidas', 'Apple', 'BMW', 'Citroen', 'Cocacola', 'DHL', 'Fedex',
 CNN_IN_WIDTH = 64
 CNN_IN_HEIGHT = 32
 CNN_IN_CH = 3
+TRAIN_DIR = 'flickr_logos_27_dataset'
+CROPPED_AUG_IMAGE_DIR = os.path.join(
+    TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
 PIXEL_DEPTH = 255.0
 
 FLAGS = tf.flags.FLAGS
-tf.app.flags.DEFINE_string(
-    "test_dir", "flickr_logos_27_dataset/flickr_logos_27_dataset_images",
-    "Directory")
 tf.app.flags.DEFINE_integer("image_width", 64, "A width of an input image")
 tf.app.flags.DEFINE_integer("image_height", 32, "A height of an input image")
 tf.app.flags.DEFINE_integer("num_channels", 3,
@@ -104,10 +104,17 @@ def main():
             sys.exit(-1)
     else:
         # Select a test image from a test directory
-        test_images_fn = [test_image
-                          for test_image in os.listdir(FLAGS.test_dir)]
+        train_test_dirs = [
+            os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, train_test_dir)
+            for class_name in os.listdir(CROPPED_AUG_IMAGE_DIR)
+            for train_test_dir in os.listdir(
+                os.path.join(CROPPED_AUG_IMAGE_DIR, class_name))
+            if not re.search('\.pickle', train_test_dir)
+        ]
+        test_dir = np.random.choice(train_test_dirs[0::2])
+        test_images_fn = [test_image for test_image in os.listdir(test_dir)]
         test_image_fn = np.random.choice(test_images_fn, 1)[0]
-        test_image_fn = os.path.join(FLAGS.test_dir, test_image_fn)
+        test_image_fn = os.path.join(test_dir, test_image_fn)
     print("Test image:", test_image_fn)
 
     # Open and resize a test image
