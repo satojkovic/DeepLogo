@@ -146,7 +146,7 @@ def main():
         saver.restore(session, "model.ckpt")
         print("Model restored.")
         pred = test_pred.eval()
-        print("Class name:", CLASS_NAME[np.where(np.array(pred) == 1)[1][0]])
+        print("Class name:", CLASS_NAME[np.argmax(pred)])
 
 
 if __name__ == '__main__':
