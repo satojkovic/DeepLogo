@@ -81,6 +81,16 @@ def model(data, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
     return out
 
 
+def load_initial_weights(fn):
+    f = np.load(fn)
+
+    # f.files has unordered keys ['arr_8', 'arr_9', 'arr_6'...]
+    # Sorting keys by value of numbers
+    initial_weights = [f[n] for n in sorted(f.files, key=lambda s: int(s[4:]))]
+
+    return initial_weights
+
+
 def main():
     if len(sys.argv) > 1:
         test_image_fn = sys.argv[1]
@@ -102,7 +112,7 @@ def main():
                             (1, FLAGS.image_width, FLAGS.image_height,
                              FLAGS.num_channels)).astype(np.float32)
 
-    # Tensorflow graph
+    # Training model
     graph = tf.Graph()
     with graph.as_default():
         # Variables
@@ -130,6 +140,20 @@ def main():
         w_fc2 = tf.Variable(tf.truncated_normal([2048, FLAGS.num_classes]))
         b_fc2 = tf.Variable(tf.constant(0.1, shape=[FLAGS.num_classes]))
 
+        params = [w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
+                  b_fc1, w_fc2, b_fc2]
+
+        # restore weights
+        f = "weights.npz"
+        if os.path.exists(f):
+            initial_weights = load_initial_weights(f)
+        else:
+            initial_weights = None
+
+        if initial_weights is not None:
+            assert len(initial_weights) == len(params)
+            assign_ops = [w.assign(v) for w, v in zip(params, initial_weights)]
+
         # A placeholder for a test image
         tf_test_image = tf.constant(test_image)
 
@@ -143,9 +167,13 @@ def main():
 
     # Recognize a brand logo of test image
     with tf.Session(graph=graph) as session:
-        saver.restore(session, "model.ckpt")
-        print("Model restored.")
-        pred = test_pred.eval()
+        tf.initialize_all_variables().run()
+        if initial_weights is not None:
+            session.run(assign_ops)
+            print('initialized by pre-learned values')
+        else:
+            print('initialized')
+        pred = session.run([test_pred])
         print("Class name:", CLASS_NAME[np.argmax(pred)])
 
 
