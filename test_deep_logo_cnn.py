@@ -28,12 +28,17 @@ import numpy as np
 import os
 from PIL import Image
 import sys
+from scipy import ndimage
 
 CLASS_NAME = ['Adidas', 'Apple', 'BMW', 'Citroen', 'Cocacola', 'DHL', 'Fedex',
               'Ferrari', 'Ford', 'Google', 'HP', 'Heineken', 'Intel',
               'McDonalds', 'Mini', 'Nbc', 'Nike', 'Pepsi', 'Porsche', 'Puma',
               'RedBull', 'Sprite', 'Starbucks', 'Texaco', 'Unicef', 'Vodafone',
               'Yahoo']
+CNN_IN_WIDTH = 64
+CNN_IN_HEIGHT = 32
+CNN_IN_CH = 3
+PIXEL_DEPTH = 255.0
 
 FLAGS = tf.flags.FLAGS
 tf.app.flags.DEFINE_string(
@@ -106,11 +111,12 @@ def main():
     print("Test image:", test_image_fn)
 
     # Open and resize a test image
-    test_image = Image.open(test_image_fn)
-    test_image = test_image.resize((FLAGS.image_width, FLAGS.image_height))
-    test_image = np.reshape(test_image,
-                            (1, FLAGS.image_width, FLAGS.image_height,
-                             FLAGS.num_channels)).astype(np.float32)
+    test_image_org = (
+        ndimage.imread(test_image_fn).astype(np.float32) - PIXEL_DEPTH / 2
+    ) / PIXEL_DEPTH
+    test_image_org.resize((CNN_IN_HEIGHT, CNN_IN_WIDTH, CNN_IN_CH))
+    test_image = test_image_org.reshape(
+        (1, CNN_IN_WIDTH, CNN_IN_HEIGHT, CNN_IN_CH))
 
     # Training model
     graph = tf.Graph()
