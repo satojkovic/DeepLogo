@@ -11,7 +11,7 @@ A brand logo recognition system using deep convolutional neural networks.
 
 ### Network
 
-The network is based on [this blog post](http://matthewearl.github.io/2016/05/06/cnn-anpr/). Same network is applied to this brand logo recognition task because a brand logo is similar with a number plate which consists of a number of digits and letters.
+The network is based on [this blog post](http://matthewearl.github.io/2016/05/06/cnn-anpr/). Same network is applied to this brand logo recognition task because a brand logo is similar to a number plate which consists of a number of digits and letters.
 
 ### License
 
