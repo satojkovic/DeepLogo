@@ -220,6 +220,10 @@ def crop_and_aug(annot_train):
     return crop_and_aug_imgs
 
 
+def crop_and_aug_with_none(annot_train, annot_query):
+    pass
+
+
 def do_train_test_split():
     class_names = [cls for cls in os.listdir(CROPPED_AUG_IMAGE_DIR)]
     for class_name in class_names:
