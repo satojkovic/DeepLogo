@@ -220,7 +220,7 @@ def crop_and_aug(annot_train):
     return crop_and_aug_imgs
 
 
-def crop_and_aug_with_none(annot_train, annot_query):
+def crop_and_aug_with_none(annot_train):
     pass
 
 
@@ -245,15 +245,19 @@ def do_train_test_split():
             shutil.move(src, dst)
 
 
+def do_train_test_split_with_none():
+    pass
+
+
 def main():
     annot_train = np.loadtxt(os.path.join(TRAIN_DIR, ANNOT_FILE), dtype='a')
     print('train_annotation: %d, %d ' % (annot_train.shape))
 
     # cropping and data augmentation
-    crop_and_aug(annot_train)
+    crop_and_aug_with_none(annot_train)
 
     # train_test_split
-    do_train_test_split()
+    do_train_test_split_with_none()
 
 
 if __name__ == '__main__':
