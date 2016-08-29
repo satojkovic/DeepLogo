@@ -29,6 +29,7 @@ from collections import defaultdict
 from itertools import product
 from sklearn.cross_validation import train_test_split
 import shutil
+import re
 
 CNN_IN_WIDTH = 64
 CNN_IN_HEIGHT = 32
@@ -44,6 +45,8 @@ TRAIN_IMAGE_DIR = os.path.join(TRAIN_DIR, 'flickr_logos_27_dataset_images')
 CROPPED_AUG_IMAGE_DIR = os.path.join(
     TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
 ANNOT_FILE = 'flickr_logos_27_dataset_training_set_annotation.txt'
+NONE_IMAGE_DIR = os.path.join(TRAIN_DIR, 'SUN397')
+NUM_OF_NONE_IMAGES = 10000
 
 
 def parse_annot(annot):
@@ -221,7 +224,33 @@ def crop_and_aug(annot_train):
 
 
 def crop_and_aug_with_none(annot_train):
-    pass
+    none_img_classes = [
+        cn.decode('utf-8')
+        for cn in np.loadtxt(
+            os.path.join(NONE_IMAGE_DIR, 'ClassName.txt'), dtype='a')
+    ]
+
+    dst_dir = os.path.join(CROPPED_AUG_IMAGE_DIR, 'None')
+    if not os.path.exists(dst_dir):
+        os.makedirs(dst_dir)
+
+    for none_class in none_img_classes:
+        none_dir = os.path.join(NONE_IMAGE_DIR, none_class[1:])
+        none_imgs = [os.path.join(none_dir, img)
+                     for img in os.listdir(none_dir)
+                     if re.search('\.jpg', img)]
+        none_imgs = np.random.choice(none_imgs, 10)
+        for none_img in none_imgs:
+            im = Image.open(none_img)
+            if im.mode != "RGB":
+                im = im.convert("RGB")
+            w, h = im.size
+            cw, ch = w // 2, h // 2
+            cropped_im = im.crop(
+                (cw - CNN_IN_WIDTH // 2, ch - CNN_IN_HEIGHT // 2,
+                 cw + CNN_IN_WIDTH // 2, ch + CNN_IN_HEIGHT // 2))
+            dst_fn = os.path.basename(none_img)
+            cropped_im.save(os.path.join(dst_dir, dst_fn))
 
 
 def do_train_test_split():
