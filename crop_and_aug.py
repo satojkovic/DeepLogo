@@ -30,6 +30,7 @@ from itertools import product
 from sklearn.cross_validation import train_test_split
 import shutil
 import re
+import glob
 
 CNN_IN_WIDTH = 64
 CNN_IN_HEIGHT = 32
@@ -177,9 +178,6 @@ def close_im(*args):
 
 
 def crop_and_aug(annot_train):
-    if not os.path.exists(CROPPED_AUG_IMAGE_DIR):
-        os.makedirs(CROPPED_AUG_IMAGE_DIR)
-
     cnt_per_file = defaultdict(int)
     for annot in annot_train:
         # for generating a file name
@@ -214,16 +212,8 @@ def crop_and_aug(annot_train):
         # close image file
         close_im([im], cropped_ims, shifted_ims, scaled_ims, rotated_ims)
 
-    # print results
-    org_imgs = [img for img in os.listdir(TRAIN_IMAGE_DIR)]
-    crop_and_aug_imgs = [img for img in os.listdir(CROPPED_AUG_IMAGE_DIR)]
-    print('original: %d' % (len(org_imgs)))
-    print('cropped: %d' % (len(crop_and_aug_imgs)))
 
-    return crop_and_aug_imgs
-
-
-def crop_and_aug_with_none(annot_train):
+def crop_none():
     none_img_classes = [
         cn.decode('utf-8')
         for cn in np.loadtxt(
@@ -253,15 +243,44 @@ def crop_and_aug_with_none(annot_train):
             cropped_im.save(os.path.join(dst_dir, dst_fn))
 
 
+def crop_and_aug_with_none(annot_train):
+    # root directory to save processed images
+    if not os.path.exists(CROPPED_AUG_IMAGE_DIR):
+        os.makedirs(CROPPED_AUG_IMAGE_DIR)
+
+    # crop images and apply augmentation
+    crop_and_aug(annot_train)
+
+    # crop images of none class
+    crop_none()
+
+    # print results
+    org_imgs = [img for img in os.listdir(TRAIN_IMAGE_DIR)]
+    crop_and_aug_imgs = [
+        fname
+        for root, dirs, files in os.walk(CROPPED_AUG_IMAGE_DIR)
+        for fname in glob.glob(os.path.join(root, '*.jpg'))
+    ]
+    print('original: %d' % (len(org_imgs)))
+    print('cropped: %d' % (len(crop_and_aug_imgs)))
+
+
 def do_train_test_split():
     class_names = [cls for cls in os.listdir(CROPPED_AUG_IMAGE_DIR)]
     for class_name in class_names:
+        if os.path.exists(
+                os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'train')):
+            continue
+        if os.path.exists(
+                os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'test')):
+            continue
+
         imgs = [img
                 for img in os.listdir(
                     os.path.join(CROPPED_AUG_IMAGE_DIR, class_name))]
         # train=0.75, test=0.25
         train_imgs, test_imgs = train_test_split(imgs)
-        # move to train or test directory
+        # move images to train or test directory
         os.makedirs(os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'train'))
         os.makedirs(os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'test'))
         for img in train_imgs:
@@ -274,10 +293,6 @@ def do_train_test_split():
             shutil.move(src, dst)
 
 
-def do_train_test_split_with_none():
-    pass
-
-
 def main():
     annot_train = np.loadtxt(os.path.join(TRAIN_DIR, ANNOT_FILE), dtype='a')
     print('train_annotation: %d, %d ' % (annot_train.shape))
@@ -286,7 +301,7 @@ def main():
     crop_and_aug_with_none(annot_train)
 
     # train_test_split
-    do_train_test_split_with_none()
+    do_train_test_split()
 
 
 if __name__ == '__main__':
