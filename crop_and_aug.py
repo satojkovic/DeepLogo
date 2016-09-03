@@ -243,7 +243,7 @@ def crop_none():
             cropped_im.save(os.path.join(dst_dir, dst_fn))
 
 
-def crop_and_aug_with_none(annot_train):
+def crop_and_aug_with_none(annot_train, with_none=False):
     # root directory to save processed images
     if not os.path.exists(CROPPED_AUG_IMAGE_DIR):
         os.makedirs(CROPPED_AUG_IMAGE_DIR)
@@ -252,7 +252,8 @@ def crop_and_aug_with_none(annot_train):
     crop_and_aug(annot_train)
 
     # crop images of none class
-    crop_none()
+    if with_none:
+        crop_none()
 
     # print results
     org_imgs = [img for img in os.listdir(TRAIN_IMAGE_DIR)]
