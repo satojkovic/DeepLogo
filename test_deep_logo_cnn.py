@@ -192,6 +192,7 @@ def main():
             print('initialized')
         pred = session.run([test_pred])
         print("Class name:", CLASS_NAME[np.argmax(pred)])
+        print("Probability:", np.max(pred))
 
 
 if __name__ == '__main__':
