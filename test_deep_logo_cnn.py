@@ -180,7 +180,7 @@ def main():
 
     # Recognize a brand logo of test image
     with tf.Session(graph=graph) as session:
-        tf.initialize_all_variables().run()
+        tf.global_variables_initializer().run()
         if initial_weights is not None:
             session.run(assign_ops)
             print('initialized by pre-learned weights')

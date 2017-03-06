@@ -186,9 +186,9 @@ def main():
                        w_conv3, b_conv3, w_fc1, b_fc1, w_fc2, b_fc2)
         with tf.name_scope('loss'):
             loss = tf.reduce_sum(
-                tf.nn.softmax_cross_entropy_with_logits(logits,
-                                                        tf_train_labels))
-            tf.scalar_summary('loss', loss)
+                tf.nn.softmax_cross_entropy_with_logits(
+                    logits=logits, labels=tf_train_labels))
+            tf.summary.scalar('loss', loss)
         optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(loss)
 
         # Predictions for the training, validation, and test data
@@ -200,15 +200,15 @@ def main():
             model(tf_test_dataset, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3,
                   b_conv3, w_fc1, b_fc1, w_fc2, b_fc2))
         # Merge all summaries
-        merged = tf.merge_all_summaries()
-        train_writer = tf.train.SummaryWriter(FLAGS.train_dir + '/train')
+        merged = tf.summary.merge_all()
+        train_writer = tf.summary.FileWriter(FLAGS.train_dir + '/train')
 
         # Add ops to save and restore all the variables
         saver = tf.train.Saver()
 
     # Do training
     with tf.Session(graph=graph) as session:
-        tf.initialize_all_variables().run()
+        tf.global_variables_initializer().run()
         if initial_weights is not None:
             session.run(assign_ops)
             print('initialized by pre-learned values')
