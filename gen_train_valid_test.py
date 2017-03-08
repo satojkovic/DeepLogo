@@ -53,9 +53,8 @@ def load_logo(data_dir):
     for image in image_files:
         image_file = os.path.join(data_dir, image)
         try:
-            image_data = (
-                ndimage.imread(image_file).astype(float) - PIXEL_DEPTH / 2
-            ) / PIXEL_DEPTH
+            image_data = (ndimage.imread(image_file).astype(float) -
+                          PIXEL_DEPTH / 2) / PIXEL_DEPTH
             if image_data.shape != (CNN_IN_HEIGHT, CNN_IN_WIDTH, CNN_IN_CH):
                 raise Exception('Unexpected image shape: %s' %
                                 str(image_data.shape))

@@ -165,9 +165,10 @@ def save_im(annot, cnt, *args):
         os.makedirs(dst_dir)
     for i, arg in enumerate(args):
         for im, suffix in zip(arg[0], arg[1]):
-            save_fn = '_'.join(
-                [fn.split('.')[0], class_name, train_subset_class, str(cnt),
-                 suffix]) + os.path.splitext(fn)[1]
+            save_fn = '_'.join([
+                fn.split('.')[0], class_name, train_subset_class, str(cnt),
+                suffix
+            ]) + os.path.splitext(fn)[1]
             im.save(os.path.join(dst_dir, save_fn))
 
 
@@ -226,9 +227,10 @@ def crop_none():
 
     for none_class in none_img_classes:
         none_dir = os.path.join(NONE_IMAGE_DIR, none_class[1:])
-        none_imgs = [os.path.join(none_dir, img)
-                     for img in os.listdir(none_dir)
-                     if re.search('\.jpg', img)]
+        none_imgs = [
+            os.path.join(none_dir, img) for img in os.listdir(none_dir)
+            if re.search('\.jpg', img)
+        ]
         none_imgs = np.random.choice(none_imgs, 10)
         for none_img in none_imgs:
             im = Image.open(none_img)
@@ -276,9 +278,11 @@ def do_train_test_split():
                 os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'test')):
             continue
 
-        imgs = [img
-                for img in os.listdir(
-                    os.path.join(CROPPED_AUG_IMAGE_DIR, class_name))]
+        imgs = [
+            img
+            for img in os.listdir(
+                os.path.join(CROPPED_AUG_IMAGE_DIR, class_name))
+        ]
         # train=0.75, test=0.25
         train_imgs, test_imgs = train_test_split(imgs)
         # move images to train or test directory

@@ -65,22 +65,19 @@ def model(data, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
           b_fc1, w_fc2, b_fc2):
     # First layer
     h_conv1 = tf.nn.relu(
-        tf.nn.conv2d(
-            data, w_conv1, [1, 1, 1, 1], padding='SAME') + b_conv1)
+        tf.nn.conv2d(data, w_conv1, [1, 1, 1, 1], padding='SAME') + b_conv1)
     h_pool1 = tf.nn.max_pool(
         h_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     # Second layer
     h_conv2 = tf.nn.relu(
-        tf.nn.conv2d(
-            h_pool1, w_conv2, [1, 1, 1, 1], padding='SAME') + b_conv2)
+        tf.nn.conv2d(h_pool1, w_conv2, [1, 1, 1, 1], padding='SAME') + b_conv2)
     h_pool2 = tf.nn.max_pool(
         h_conv2, ksize=[1, 1, 2, 1], strides=[1, 1, 2, 1], padding='SAME')
 
     # Third layer
     h_conv3 = tf.nn.relu(
-        tf.nn.conv2d(
-            h_pool2, w_conv3, [1, 1, 1, 1], padding='SAME') + b_conv3)
+        tf.nn.conv2d(h_pool2, w_conv3, [1, 1, 1, 1], padding='SAME') + b_conv3)
     h_pool3 = tf.nn.max_pool(
         h_conv3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
@@ -118,9 +115,9 @@ def main():
 
         # f.files has unordered keys ['arr_8', 'arr_9', 'arr_6'...]
         # Sorting keys by value of numbers
-        initial_weights = [f[n]
-                           for n in sorted(
-                               f.files, key=lambda s: int(s[4:]))]
+        initial_weights = [
+            f[n] for n in sorted(f.files, key=lambda s: int(s[4:]))
+        ]
     else:
         initial_weights = None
 
@@ -155,16 +152,17 @@ def main():
         b_conv3 = tf.Variable(tf.constant(0.1, shape=[128]))
 
         w_fc1 = tf.Variable(
-            tf.truncated_normal(
-                [16 * 4 * 128, 2048], stddev=0.1))
+            tf.truncated_normal([16 * 4 * 128, 2048], stddev=0.1))
         b_fc1 = tf.Variable(tf.constant(0.1, shape=[2048]))
 
         w_fc2 = tf.Variable(tf.truncated_normal([2048, FLAGS.num_classes]))
         b_fc2 = tf.Variable(tf.constant(0.1, shape=[FLAGS.num_classes]))
 
         # Params
-        params = [w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
-                  b_fc1, w_fc2, b_fc2]
+        params = [
+            w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1, b_fc1,
+            w_fc2, b_fc2
+        ]
 
         # Initial weights
         if initial_weights is not None:
@@ -220,14 +218,16 @@ def main():
             batch_data = train_dataset[offset:(offset + FLAGS.batch_size
                                                ), :, :, :]
             batch_labels = train_labels[offset:(offset + FLAGS.batch_size), :]
-            feed_dict = {tf_train_dataset: batch_data,
-                         tf_train_labels: batch_labels}
+            feed_dict = {
+                tf_train_dataset: batch_data,
+                tf_train_labels: batch_labels
+            }
             try:
                 _, l, predictions = session.run(
                     [optimizer, loss, train_prediction], feed_dict=feed_dict)
                 if step % 50 == 0:
-                    summary, _ = session.run([merged, optimizer],
-                                             feed_dict=feed_dict)
+                    summary, _ = session.run(
+                        [merged, optimizer], feed_dict=feed_dict)
                     train_writer.add_summary(summary, step)
                     print('Minibatch loss at step %d: %f' % (step, l))
                     print('Minibatch accuracy: %.1f%%' %

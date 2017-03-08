@@ -30,11 +30,12 @@ import sys
 from scipy import ndimage
 import re
 
-CLASS_NAME = ['Adidas', 'Apple', 'BMW', 'Citroen', 'Cocacola', 'DHL', 'Fedex',
-              'Ferrari', 'Ford', 'Google', 'HP', 'Heineken', 'Intel',
-              'McDonalds', 'Mini', 'Nbc', 'Nike', 'Pepsi', 'Porsche', 'Puma',
-              'RedBull', 'Sprite', 'Starbucks', 'Texaco', 'Unicef', 'Vodafone',
-              'Yahoo']
+CLASS_NAME = [
+    'Adidas', 'Apple', 'BMW', 'Citroen', 'Cocacola', 'DHL', 'Fedex', 'Ferrari',
+    'Ford', 'Google', 'HP', 'Heineken', 'Intel', 'McDonalds', 'Mini', 'Nbc',
+    'Nike', 'Pepsi', 'Porsche', 'Puma', 'RedBull', 'Sprite', 'Starbucks',
+    'Texaco', 'Unicef', 'Vodafone', 'Yahoo'
+]
 CNN_IN_WIDTH = 64
 CNN_IN_HEIGHT = 32
 CNN_IN_CH = 3
@@ -57,22 +58,19 @@ def model(data, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
           b_fc1, w_fc2, b_fc2):
     # First layer
     h_conv1 = tf.nn.relu(
-        tf.nn.conv2d(
-            data, w_conv1, [1, 1, 1, 1], padding='SAME') + b_conv1)
+        tf.nn.conv2d(data, w_conv1, [1, 1, 1, 1], padding='SAME') + b_conv1)
     h_pool1 = tf.nn.max_pool(
         h_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     # Second layer
     h_conv2 = tf.nn.relu(
-        tf.nn.conv2d(
-            h_pool1, w_conv2, [1, 1, 1, 1], padding='SAME') + b_conv2)
+        tf.nn.conv2d(h_pool1, w_conv2, [1, 1, 1, 1], padding='SAME') + b_conv2)
     h_pool2 = tf.nn.max_pool(
         h_conv2, ksize=[1, 1, 2, 1], strides=[1, 1, 2, 1], padding='SAME')
 
     # Third layer
     h_conv3 = tf.nn.relu(
-        tf.nn.conv2d(
-            h_pool2, w_conv3, [1, 1, 1, 1], padding='SAME') + b_conv3)
+        tf.nn.conv2d(h_pool2, w_conv3, [1, 1, 1, 1], padding='SAME') + b_conv3)
     h_pool3 = tf.nn.max_pool(
         h_conv3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
@@ -118,9 +116,8 @@ def main():
     print("Test image:", test_image_fn)
 
     # Open and resize a test image
-    test_image_org = (
-        ndimage.imread(test_image_fn).astype(np.float32) - PIXEL_DEPTH / 2
-    ) / PIXEL_DEPTH
+    test_image_org = (ndimage.imread(test_image_fn).astype(np.float32) -
+                      PIXEL_DEPTH / 2) / PIXEL_DEPTH
     test_image_org.resize((CNN_IN_HEIGHT, CNN_IN_WIDTH, CNN_IN_CH))
     test_image = test_image_org.reshape(
         (1, CNN_IN_WIDTH, CNN_IN_HEIGHT, CNN_IN_CH))
@@ -146,15 +143,16 @@ def main():
         b_conv3 = tf.Variable(tf.constant(0.1, shape=[128]))
 
         w_fc1 = tf.Variable(
-            tf.truncated_normal(
-                [16 * 4 * 128, 2048], stddev=0.1))
+            tf.truncated_normal([16 * 4 * 128, 2048], stddev=0.1))
         b_fc1 = tf.Variable(tf.constant(0.1, shape=[2048]))
 
         w_fc2 = tf.Variable(tf.truncated_normal([2048, FLAGS.num_classes]))
         b_fc2 = tf.Variable(tf.constant(0.1, shape=[FLAGS.num_classes]))
 
-        params = [w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
-                  b_fc1, w_fc2, b_fc2]
+        params = [
+            w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1, b_fc1,
+            w_fc2, b_fc2
+        ]
 
         # restore weights
         f = "weights.npz"
