@@ -29,13 +29,8 @@ import os
 import sys
 from scipy import ndimage
 import re
+import common
 
-CLASS_NAME = [
-    'Adidas', 'Apple', 'BMW', 'Citroen', 'Cocacola', 'DHL', 'Fedex', 'Ferrari',
-    'Ford', 'Google', 'HP', 'Heineken', 'Intel', 'McDonalds', 'Mini', 'Nbc',
-    'Nike', 'Pepsi', 'Porsche', 'Puma', 'RedBull', 'Sprite', 'Starbucks',
-    'Texaco', 'Unicef', 'Vodafone', 'Yahoo'
-]
 CNN_IN_WIDTH = 64
 CNN_IN_HEIGHT = 32
 CNN_IN_CH = 3
@@ -102,14 +97,11 @@ def main():
             sys.exit(-1)
     else:
         # Select a test image from a test directory
-        train_test_dirs = [
-            os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, train_test_dir)
-            for class_name in os.listdir(CROPPED_AUG_IMAGE_DIR)
-            for train_test_dir in os.listdir(
-                os.path.join(CROPPED_AUG_IMAGE_DIR, class_name))
-            if not re.search('\.pickle', train_test_dir)
+        test_dirs = [
+            os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'test')
+            for class_name in common.CLASS_NAME
         ]
-        test_dir = np.random.choice(train_test_dirs[0::2])
+        test_dir = np.random.choice(test_dirs)
         test_images_fn = [test_image for test_image in os.listdir(test_dir)]
         test_image_fn = np.random.choice(test_images_fn, 1)[0]
         test_image_fn = os.path.join(test_dir, test_image_fn)
@@ -189,7 +181,7 @@ def main():
         else:
             print('initialized')
         pred = session.run([test_pred])
-        print("Class name:", CLASS_NAME[np.argmax(pred)])
+        print("Class name:", common.CLASS_NAME[np.argmax(pred)])
         print("Probability:", np.max(pred))
 
 

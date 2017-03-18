@@ -28,6 +28,7 @@ import os
 from scipy import ndimage
 from six.moves import cPickle as pickle
 import re
+import common
 
 CNN_IN_WIDTH = 64
 CNN_IN_HEIGHT = 32
@@ -161,16 +162,17 @@ def randomize(dataset, labels):
 
 
 def main():
-    train_test_dirs = [
-        os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, train_test_dir)
-        for class_name in os.listdir(CROPPED_AUG_IMAGE_DIR)
-        for train_test_dir in os.listdir(
-            os.path.join(CROPPED_AUG_IMAGE_DIR, class_name))
-        if not re.search('\.pickle', train_test_dir)
+    train_dirs = [
+        os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'train')
+        for class_name in common.CLASS_NAME
+    ]
+    test_dirs = [
+        os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'test')
+        for class_name in common.CLASS_NAME
     ]
 
-    train_datasets = maybe_pickle(train_test_dirs[1::2])
-    test_datasets = maybe_pickle(train_test_dirs[0::2])
+    train_datasets = maybe_pickle(train_dirs)
+    test_datasets = maybe_pickle(test_dirs)
 
     valid_dataset, valid_labels, train_dataset, train_labels = merge_datasets(
         train_datasets, TRAIN_SIZE, VALID_SIZE)
