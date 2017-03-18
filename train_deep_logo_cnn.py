@@ -28,6 +28,7 @@ import numpy as np
 from six.moves import cPickle as pickle
 from six.moves import range
 import sys
+import os
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -243,8 +244,12 @@ def main():
                                                  test_labels))
 
         # Save the variables to disk.
-        save_path = saver.save(session, "model.ckpt")
-        print("Model saved in file: %s" % save_path)
+        save_dir = "models"
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        save_path = os.path.join(save_dir, "deep_logo_model")
+        saved = saver.save(session, save_path)
+        print("Model saved in file: %s" % saved)
 
 
 if __name__ == '__main__':
