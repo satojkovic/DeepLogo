@@ -37,9 +37,11 @@ CROPPED_AUG_IMAGE_DIR = os.path.join(
 PIXEL_DEPTH = 255.0
 
 FLAGS = tf.flags.FLAGS
-tf.app.flags.DEFINE_integer("image_width", 64, "A width of an input image")
-tf.app.flags.DEFINE_integer("image_height", 32, "A height of an input image")
-tf.app.flags.DEFINE_integer("num_channels", 3,
+tf.app.flags.DEFINE_integer("image_width", common.CNN_IN_WIDTH,
+                            "A width of an input image")
+tf.app.flags.DEFINE_integer("image_height", common.CNN_IN_HEIGHT,
+                            "A height of an input image")
+tf.app.flags.DEFINE_integer("num_channels", common.CNN_IN_CH,
                             "A number of channels of an input image")
 tf.app.flags.DEFINE_integer("num_classes", 27, "Number of logo classes.")
 tf.app.flags.DEFINE_integer("patch_size", 5,
@@ -110,7 +112,7 @@ def main():
     test_image_org.resize((common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
                            common.CNN_IN_CH))
     test_image = test_image_org.reshape(
-        (1, common.CNN_IN_WIDTH, common.CNN_IN_HEIGHT, common.CNN_IN_CH))
+        (1, common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH, common.CNN_IN_CH))
 
     # Training model
     graph = tf.Graph()

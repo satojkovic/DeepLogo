@@ -58,7 +58,7 @@ def accuracy(predictions, labels):
 
 
 def reformat(dataset, labels):
-    dataset = dataset.reshape((-1, FLAGS.image_width, FLAGS.image_height,
+    dataset = dataset.reshape((-1, FLAGS.image_height, FLAGS.image_width,
                                FLAGS.num_channels)).astype(np.float32)
     labels = (
         np.arange(FLAGS.num_classes) == labels[:, None]).astype(np.float32)
@@ -176,7 +176,7 @@ def main():
         # Input data
         tf_train_dataset = tf.placeholder(
             tf.float32,
-            shape=(FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
+            shape=(FLAGS.batch_size, FLAGS.image_height, FLAGS.image_width,
                    FLAGS.num_channels))
         tf_train_labels = tf.placeholder(
             tf.float32, shape=(FLAGS.batch_size, FLAGS.num_classes))
