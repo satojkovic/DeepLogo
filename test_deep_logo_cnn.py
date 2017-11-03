@@ -31,9 +31,6 @@ from scipy import ndimage
 import re
 import common
 
-CNN_IN_WIDTH = 64
-CNN_IN_HEIGHT = 32
-CNN_IN_CH = 3
 TRAIN_DIR = 'flickr_logos_27_dataset'
 CROPPED_AUG_IMAGE_DIR = os.path.join(
     TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
@@ -110,9 +107,10 @@ def main():
     # Open and resize a test image
     test_image_org = (ndimage.imread(test_image_fn).astype(np.float32) -
                       PIXEL_DEPTH / 2) / PIXEL_DEPTH
-    test_image_org.resize((CNN_IN_HEIGHT, CNN_IN_WIDTH, CNN_IN_CH))
+    test_image_org.resize((common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
+                           common.CNN_IN_CH))
     test_image = test_image_org.reshape(
-        (1, CNN_IN_WIDTH, CNN_IN_HEIGHT, CNN_IN_CH))
+        (1, common.CNN_IN_WIDTH, common.CNN_IN_HEIGHT, common.CNN_IN_CH))
 
     # Training model
     graph = tf.Graph()

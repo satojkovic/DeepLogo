@@ -30,9 +30,6 @@ from six.moves import cPickle as pickle
 import re
 import common
 
-CNN_IN_WIDTH = 64
-CNN_IN_HEIGHT = 32
-CNN_IN_CH = 3
 PIXEL_DEPTH = 255.0
 TRAIN_DIR = 'flickr_logos_27_dataset'
 CROPPED_AUG_IMAGE_DIR = os.path.join(
@@ -47,7 +44,8 @@ TEST_SIZE = 5000  # There are 54425 test files.
 def load_logo(data_dir):
     image_files = os.listdir(data_dir)
     dataset = np.ndarray(
-        shape=(len(image_files), CNN_IN_HEIGHT, CNN_IN_WIDTH, CNN_IN_CH),
+        shape=(len(image_files), common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
+               common.CNN_IN_CH),
         dtype=np.float32)
     print(data_dir)
     num_images = 0
@@ -56,9 +54,10 @@ def load_logo(data_dir):
         try:
             image_data = (ndimage.imread(image_file).astype(float) -
                           PIXEL_DEPTH / 2) / PIXEL_DEPTH
-            if image_data.shape != (CNN_IN_HEIGHT, CNN_IN_WIDTH, CNN_IN_CH):
-                raise Exception('Unexpected image shape: %s' %
-                                str(image_data.shape))
+            if image_data.shape != (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
+                                    common.CNN_IN_CH):
+                raise Exception(
+                    'Unexpected image shape: %s' % str(image_data.shape))
             dataset[num_images, :, :] = image_data
             num_images = num_images + 1
         except IOError as e:
@@ -103,10 +102,12 @@ def make_arrays(nb_rows, image_width, image_height, image_ch=1):
 
 def merge_datasets(pickle_files, train_size, valid_size=0):
     num_classes = len(pickle_files)
-    valid_dataset, valid_labels = make_arrays(valid_size, CNN_IN_WIDTH,
-                                              CNN_IN_HEIGHT, CNN_IN_CH)
-    train_dataset, train_labels = make_arrays(train_size, CNN_IN_WIDTH,
-                                              CNN_IN_HEIGHT, CNN_IN_CH)
+    valid_dataset, valid_labels = make_arrays(valid_size, common.CNN_IN_WIDTH,
+                                              common.CNN_IN_HEIGHT,
+                                              common.CNN_IN_CH)
+    train_dataset, train_labels = make_arrays(train_size, common.CNN_IN_WIDTH,
+                                              common.CNN_IN_HEIGHT,
+                                              common.CNN_IN_CH)
     vsize_per_class = valid_size // num_classes
     tsize_per_class = train_size // num_classes
 
