@@ -82,6 +82,7 @@ def aug_pos(annot, im):
         cy = rect['cy'] + sy
         cropped_im = im.crop((cx - rect['wid'] // 2, cy - rect['hgt'] // 2,
                               cx + rect['wid'] // 2, cy + rect['hgt'] // 2))
+        # The requested size in pixels, as a 2-tuple (width, height)
         resized_im = cropped_im.resize((common.CNN_IN_WIDTH,
                                         common.CNN_IN_HEIGHT))
         aug_pos_ims.append(resized_im)
@@ -239,6 +240,7 @@ def crop_none():
                 im = im.convert("RGB")
             w, h = im.size
             cw, ch = w // 2, h // 2
+            # The crop rectangle, as a (left, upper, right, lower)-tuple
             cropped_im = im.crop((
                 cw - common.CNN_IN_WIDTH // 2, ch - common.CNN_IN_HEIGHT // 2,
                 cw + common.CNN_IN_WIDTH // 2, ch + common.CNN_IN_HEIGHT // 2))
