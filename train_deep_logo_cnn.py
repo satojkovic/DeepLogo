@@ -29,6 +29,7 @@ from six.moves import cPickle as pickle
 from six.moves import range
 import sys
 import os
+import common
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -36,12 +37,14 @@ tf.app.flags.DEFINE_string(
     "train_dir", "flickr_logos_27_dataset",
     "Directory where to write event logs and checkpoint.")
 tf.app.flags.DEFINE_integer("max_steps", 10001, "Number of batches to run.")
-tf.app.flags.DEFINE_integer("image_width", 64, "A width of an input image.")
-tf.app.flags.DEFINE_integer("image_height", 32, "A height of an input image.")
+tf.app.flags.DEFINE_integer("image_width", common.CNN_IN_WIDTH,
+                            "A width of an input image.")
+tf.app.flags.DEFINE_integer("image_height", common.CNN_IN_HEIGHT,
+                            "A height of an input image.")
 tf.app.flags.DEFINE_integer("num_classes", 27, "Number of logo classes.")
 tf.app.flags.DEFINE_integer("learning_rate", 0.0001, "Learning rate")
 tf.app.flags.DEFINE_integer("batch_size", 64, "A batch size")
-tf.app.flags.DEFINE_integer("num_channels", 3,
+tf.app.flags.DEFINE_integer("num_channels", common.CNN_IN_CH,
                             "A number of channels of an input image.")
 tf.app.flags.DEFINE_integer("patch_size", 5,
                             "A patch size of convolution filter")
