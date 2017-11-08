@@ -25,19 +25,23 @@
 import numpy as np
 import os
 from PIL import Image
-from collections import defaultdict
+from collections import defaultdict, deque
 from itertools import product
 from sklearn.model_selection import train_test_split
 import shutil
 import re
 import glob
 import common
+import skimage.io
+from skimage import transform as sktf
+from scipy.misc import imresize
 
 DATA_AUG_POS_SHIFT_MIN = -2
 DATA_AUG_POS_SHIFT_MAX = 2
 DATA_AUG_SCALES = [0.9, 1.1]
 DATA_AUG_ROT_MIN = -15
 DATA_AUG_ROT_MAX = 15
+MAX_DATA_AUG_PER_LINE = 20
 
 TRAIN_DIR = 'flickr_logos_27_dataset'
 TRAIN_IMAGE_DIR = os.path.join(TRAIN_DIR, 'flickr_logos_27_dataset_images')
@@ -178,6 +182,49 @@ def close_im(*args):
     for ims in args:
         for im in ims:
             im.close()
+
+
+def get_annot_rect(annot):
+    return np.array(list(map(lambda x: int(x), annot[3:])))
+
+
+def crop_image(img, rect):
+    return img[rect[1]:rect[3], rect[0]:rect[2]]
+
+
+def resize_img(img, size=(common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH)):
+    return imresize(img, size, interp='bicubic')
+
+
+def crop_and_aug_random(annot_train):
+    # Result of data augmentation
+    aug_results = deque(maxlen=MAX_DATA_AUG_PER_LINE)
+    cnt_per_line = defaultdict(int)
+
+    for i, annot in enumerate(annot_train):
+        # Get image file name
+        fn, _, _ = parse_annot(annot)
+
+        # Skip if width or height equal zero
+        if is_skip(annot[3:]):
+            print('Skip: ', fn)
+            continue
+
+        # Read image
+        img = skimage.io.imread(os.path.join(TRAIN_IMAGE_DIR, fn))
+
+        # Crop logo area
+        annot_rect = get_annot_rect(annot)
+        cropped_img = crop_image(img, annot_rect)
+
+        # Resize cropped image
+        resized_cropped_img = resize_img(cropped_img)
+        aug_results.append(resized_cropped_img)
+        cnt_per_line[i] += 1
+
+        # Data augmentation by affine transform
+        while cnt_per_line[i] <= MAX_DATA_AUG_PER_LINE:
+            pass
 
 
 def crop_and_aug(annot_train):
