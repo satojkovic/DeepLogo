@@ -52,7 +52,7 @@ def load_logo(data_dir):
     for image in image_files:
         image_file = os.path.join(data_dir, image)
         try:
-            image_data = (ndimage.imread(image_file).astype(float) -
+            image_data = (ndimage.imread(image_file).astype(np.float32) -
                           PIXEL_DEPTH / 2) / PIXEL_DEPTH
             if image_data.shape != (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
                                     common.CNN_IN_CH):
