@@ -54,6 +54,10 @@ def load_logo(data_dir):
         try:
             image_data = (ndimage.imread(image_file).astype(np.float32) -
                           PIXEL_DEPTH / 2) / PIXEL_DEPTH
+            if image_data.ndim == 2:
+                image_data = np.reshape(image_data, (common.CNN_IN_HEIGHT,
+                                                     common.CNN_IN_WIDTH,
+                                                     common.CNN_IN_CH))
             if image_data.shape != (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
                                     common.CNN_IN_CH):
                 raise Exception(
@@ -90,7 +94,7 @@ def maybe_pickle(data_dirs, force=False):
     return dataset_names
 
 
-def make_arrays(nb_rows, image_width, image_height, image_ch=1):
+def make_arrays(nb_rows, image_width, image_height, image_ch):
     if nb_rows:
         dataset = np.ndarray(
             (nb_rows, image_height, image_width, image_ch), dtype=np.float32)

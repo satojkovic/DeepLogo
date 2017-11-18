@@ -164,7 +164,9 @@ def crop_and_aug_random(annot_train):
             continue
 
         # Read image by skimage
-        img = skimage.io.imread(os.path.join(TRAIN_IMAGE_DIR, fn))
+        img = skimage.io.imread(
+            os.path.join(TRAIN_IMAGE_DIR, fn), as_grey=True)
+        img = skimage.exposure.equalize_adapthist(img)
 
         # Crop logo area
         annot_rect = get_annot_rect(annot)
@@ -183,7 +185,8 @@ def crop_and_aug_random(annot_train):
         # Data augmentation by affine transformation
         while cnt_per_line[i] < MAX_DATA_AUG_PER_LINE:
             affine_mat, params = make_affine_transform()
-            transformed_img = sktf.warp(resized_cropped_img, affine_mat)
+            transformed_img = sktf.warp(cropped_img, affine_mat, mode='edge')
+            transformed_img = resize_img(transformed_img)
             aug_results.append(transformed_img)
             aug_params.append(params)
             cnt_per_line[i] += 1
