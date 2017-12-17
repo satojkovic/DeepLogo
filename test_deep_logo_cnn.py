@@ -30,6 +30,7 @@ import sys
 from scipy import ndimage
 import re
 import common
+import model
 
 TRAIN_DIR = 'flickr_logos_27_dataset'
 CROPPED_AUG_IMAGE_DIR = os.path.join(
@@ -46,36 +47,6 @@ tf.app.flags.DEFINE_integer("num_channels", common.CNN_IN_CH,
 tf.app.flags.DEFINE_integer("num_classes", 27, "Number of logo classes.")
 tf.app.flags.DEFINE_integer("patch_size", 5,
                             "A patch size of convolution filter")
-
-
-def model(data, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
-          b_fc1, w_fc2, b_fc2):
-    # First layer
-    h_conv1 = tf.nn.relu(
-        tf.nn.conv2d(data, w_conv1, [1, 1, 1, 1], padding='SAME') + b_conv1)
-    h_pool1 = tf.nn.max_pool(
-        h_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-    # Second layer
-    h_conv2 = tf.nn.relu(
-        tf.nn.conv2d(h_pool1, w_conv2, [1, 1, 1, 1], padding='SAME') + b_conv2)
-    h_pool2 = tf.nn.max_pool(
-        h_conv2, ksize=[1, 1, 2, 1], strides=[1, 1, 2, 1], padding='SAME')
-
-    # Third layer
-    h_conv3 = tf.nn.relu(
-        tf.nn.conv2d(h_pool2, w_conv3, [1, 1, 1, 1], padding='SAME') + b_conv3)
-    h_pool3 = tf.nn.max_pool(
-        h_conv3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-    # Fully connected layer
-    conv_layer_flat = tf.reshape(h_pool3, [-1, 16 * 4 * 128])
-    h_fc1 = tf.nn.relu(tf.matmul(conv_layer_flat, w_fc1) + b_fc1)
-
-    # Output layer
-    out = tf.matmul(h_fc1, w_fc2) + b_fc2
-
-    return out
 
 
 def load_initial_weights(fn):
@@ -117,34 +88,8 @@ def main():
     # Training model
     graph = tf.Graph()
     with graph.as_default():
-        # Variables
-        w_conv1 = tf.Variable(
-            tf.truncated_normal(
-                [FLAGS.patch_size, FLAGS.patch_size, FLAGS.num_channels, 48],
-                stddev=0.1))
-        b_conv1 = tf.Variable(tf.constant(0.1, shape=[48]))
-
-        w_conv2 = tf.Variable(
-            tf.truncated_normal(
-                [FLAGS.patch_size, FLAGS.patch_size, 48, 64], stddev=0.1))
-        b_conv2 = tf.Variable(tf.constant(0.1, shape=[64]))
-
-        w_conv3 = tf.Variable(
-            tf.truncated_normal(
-                [FLAGS.patch_size, FLAGS.patch_size, 64, 128], stddev=0.1))
-        b_conv3 = tf.Variable(tf.constant(0.1, shape=[128]))
-
-        w_fc1 = tf.Variable(
-            tf.truncated_normal([16 * 4 * 128, 2048], stddev=0.1))
-        b_fc1 = tf.Variable(tf.constant(0.1, shape=[2048]))
-
-        w_fc2 = tf.Variable(tf.truncated_normal([2048, FLAGS.num_classes]))
-        b_fc2 = tf.Variable(tf.constant(0.1, shape=[FLAGS.num_classes]))
-
-        params = [
-            w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1, b_fc1,
-            w_fc2, b_fc2
-        ]
+        # Weights and biases
+        model_params = model.params()
 
         # restore weights
         f = "weights.npz"
@@ -154,15 +99,16 @@ def main():
             initial_weights = None
 
         if initial_weights is not None:
-            assert len(initial_weights) == len(params)
-            assign_ops = [w.assign(v) for w, v in zip(params, initial_weights)]
+            assert len(initial_weights) == len(model_params)
+            assign_ops = [
+                w.assign(v) for w, v in zip(model_params, initial_weights)
+            ]
 
         # A placeholder for a test image
         tf_test_image = tf.constant(test_image)
 
         # model
-        logits = model(tf_test_image, w_conv1, b_conv1, w_conv2, b_conv2,
-                       w_conv3, b_conv3, w_fc1, b_fc1, w_fc2, b_fc2)
+        logits = model.cnn(tf_test_image, model_params)
         test_pred = tf.nn.softmax(logits)
 
         # Restore ops
