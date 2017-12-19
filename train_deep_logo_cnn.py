@@ -30,6 +30,7 @@ from six.moves import range
 import sys
 import os
 import common
+import model
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -41,13 +42,10 @@ tf.app.flags.DEFINE_integer("image_width", common.CNN_IN_WIDTH,
                             "A width of an input image.")
 tf.app.flags.DEFINE_integer("image_height", common.CNN_IN_HEIGHT,
                             "A height of an input image.")
-tf.app.flags.DEFINE_integer("num_classes", 27, "Number of logo classes.")
 tf.app.flags.DEFINE_integer("learning_rate", 0.0001, "Learning rate")
 tf.app.flags.DEFINE_integer("batch_size", 64, "A batch size")
 tf.app.flags.DEFINE_integer("num_channels", common.CNN_IN_CH,
                             "A number of channels of an input image.")
-tf.app.flags.DEFINE_integer("patch_size", 5,
-                            "A patch size of convolution filter")
 
 PICKLE_FILENAME = 'deep_logo.pickle'
 
@@ -61,38 +59,8 @@ def reformat(dataset, labels):
     dataset = dataset.reshape((-1, FLAGS.image_height, FLAGS.image_width,
                                FLAGS.num_channels)).astype(np.float32)
     labels = (
-        np.arange(FLAGS.num_classes) == labels[:, None]).astype(np.float32)
+        np.arange(model.NUM_CLASSES) == labels[:, None]).astype(np.float32)
     return dataset, labels
-
-
-def model(data, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1,
-          b_fc1, w_fc2, b_fc2):
-    # First layer
-    h_conv1 = tf.nn.relu(
-        tf.nn.conv2d(data, w_conv1, [1, 1, 1, 1], padding='SAME') + b_conv1)
-    h_pool1 = tf.nn.max_pool(
-        h_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-    # Second layer
-    h_conv2 = tf.nn.relu(
-        tf.nn.conv2d(h_pool1, w_conv2, [1, 1, 1, 1], padding='SAME') + b_conv2)
-    h_pool2 = tf.nn.max_pool(
-        h_conv2, ksize=[1, 1, 2, 1], strides=[1, 1, 2, 1], padding='SAME')
-
-    # Third layer
-    h_conv3 = tf.nn.relu(
-        tf.nn.conv2d(h_pool2, w_conv3, [1, 1, 1, 1], padding='SAME') + b_conv3)
-    h_pool3 = tf.nn.max_pool(
-        h_conv3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-    # Fully connected layer
-    conv_layer_flat = tf.reshape(h_pool3, [-1, 16 * 4 * 128])
-    h_fc1 = tf.nn.relu(tf.matmul(conv_layer_flat, w_fc1) + b_fc1)
-
-    # Output layer
-    out = tf.matmul(h_fc1, w_fc2) + b_fc2
-
-    return out
 
 
 def read_data():
@@ -138,40 +106,15 @@ def main():
     # Training model
     graph = tf.Graph()
     with graph.as_default():
-        # Variables
-        w_conv1 = tf.Variable(
-            tf.truncated_normal(
-                [FLAGS.patch_size, FLAGS.patch_size, FLAGS.num_channels, 48],
-                stddev=0.1))
-        b_conv1 = tf.Variable(tf.constant(0.1, shape=[48]))
-
-        w_conv2 = tf.Variable(
-            tf.truncated_normal(
-                [FLAGS.patch_size, FLAGS.patch_size, 48, 64], stddev=0.1))
-        b_conv2 = tf.Variable(tf.constant(0.1, shape=[64]))
-
-        w_conv3 = tf.Variable(
-            tf.truncated_normal(
-                [FLAGS.patch_size, FLAGS.patch_size, 64, 128], stddev=0.1))
-        b_conv3 = tf.Variable(tf.constant(0.1, shape=[128]))
-
-        w_fc1 = tf.Variable(
-            tf.truncated_normal([16 * 4 * 128, 2048], stddev=0.1))
-        b_fc1 = tf.Variable(tf.constant(0.1, shape=[2048]))
-
-        w_fc2 = tf.Variable(tf.truncated_normal([2048, FLAGS.num_classes]))
-        b_fc2 = tf.Variable(tf.constant(0.1, shape=[FLAGS.num_classes]))
-
-        # Params
-        params = [
-            w_conv1, b_conv1, w_conv2, b_conv2, w_conv3, b_conv3, w_fc1, b_fc1,
-            w_fc2, b_fc2
-        ]
+        # Weights and biases
+        model_params = model.params()
 
         # Initial weights
         if initial_weights is not None:
-            assert len(params) == len(initial_weights)
-            assign_ops = [w.assign(v) for w, v in zip(params, initial_weights)]
+            assert len(model_params) == len(initial_weights)
+            assign_ops = [
+                w.assign(v) for w, v in zip(model_params, initial_weights)
+            ]
 
         # Input data
         tf_train_dataset = tf.placeholder(
@@ -179,13 +122,12 @@ def main():
             shape=(FLAGS.batch_size, FLAGS.image_height, FLAGS.image_width,
                    FLAGS.num_channels))
         tf_train_labels = tf.placeholder(
-            tf.float32, shape=(FLAGS.batch_size, FLAGS.num_classes))
+            tf.float32, shape=(FLAGS.batch_size, model.NUM_CLASSES))
         tf_valid_dataset = tf.constant(valid_dataset)
         tf_test_dataset = tf.constant(test_dataset)
 
         # Training computation
-        logits = model(tf_train_dataset, w_conv1, b_conv1, w_conv2, b_conv2,
-                       w_conv3, b_conv3, w_fc1, b_fc1, w_fc2, b_fc2)
+        logits = model.cnn(tf_train_dataset, model_params)
         with tf.name_scope('loss'):
             loss = tf.reduce_sum(
                 tf.nn.softmax_cross_entropy_with_logits(
@@ -196,11 +138,9 @@ def main():
         # Predictions for the training, validation, and test data
         train_prediction = tf.nn.softmax(logits)
         valid_prediction = tf.nn.softmax(
-            model(tf_valid_dataset, w_conv1, b_conv1, w_conv2, b_conv2,
-                  w_conv3, b_conv3, w_fc1, b_fc1, w_fc2, b_fc2))
+            model.cnn(tf_valid_dataset, model_params))
         test_prediction = tf.nn.softmax(
-            model(tf_test_dataset, w_conv1, b_conv1, w_conv2, b_conv2, w_conv3,
-                  b_conv3, w_fc1, b_fc1, w_fc2, b_fc2))
+            model.cnn(tf_test_dataset, model_params))
         # Merge all summaries
         merged = tf.summary.merge_all()
         train_writer = tf.summary.FileWriter(FLAGS.train_dir + '/train')
@@ -234,12 +174,12 @@ def main():
                         [merged, optimizer], feed_dict=feed_dict)
                     train_writer.add_summary(summary, step)
                     print('Minibatch loss at step %d: %f' % (step, l))
-                    print('Minibatch accuracy: %.1f%%' %
-                          accuracy(predictions, batch_labels))
-                    print('Validation accuracy: %.1f%%' %
-                          accuracy(valid_prediction.eval(), valid_labels))
+                    print('Minibatch accuracy: %.1f%%' % accuracy(
+                        predictions, batch_labels))
+                    print('Validation accuracy: %.1f%%' % accuracy(
+                        valid_prediction.eval(), valid_labels))
             except KeyboardInterrupt:
-                last_weights = [p.eval() for p in params]
+                last_weights = [p.eval() for p in model_params]
                 np.savez("weights.npz", *last_weights)
                 return last_weights
 

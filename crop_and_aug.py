@@ -25,6 +25,7 @@
 import numpy as np
 import os
 from collections import defaultdict, deque
+from itertools import product
 from sklearn.model_selection import train_test_split
 import shutil
 import glob
@@ -33,6 +34,7 @@ import skimage.io
 from skimage import transform as sktf
 from scipy.misc import imresize
 import warnings
+import cv2
 
 MAX_DATA_AUG_PER_LINE = 30
 MAX_SHIFT_WIDTH = common.CNN_IN_WIDTH * 0.1
@@ -69,6 +71,15 @@ def get_rect(annot):
     rect['wid'] = wid
     rect['hgt'] = hgt
     return rect
+
+
+def crop_logos(annot, im):
+    x1, y1, x2, y2 = rect_coord(annot[3:])
+    cropped_im = im[y1:y2, x1:x2]
+    cropped_im = cv2.resize(cropped_im, (common.CNN_IN_WIDTH,
+                                         common.CNN_IN_HEIGHT))
+    cropped_suffix = 'p00'
+    return [cropped_im], [cropped_suffix]
 
 
 def rect_coord(annot_part):

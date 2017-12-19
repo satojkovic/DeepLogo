@@ -26,9 +26,11 @@
 import numpy as np
 import os
 from scipy import ndimage
+import cv2
 from six.moves import cPickle as pickle
 import re
 import common
+import preprocess
 
 PIXEL_DEPTH = 255.0
 TRAIN_DIR = 'flickr_logos_27_dataset'
@@ -52,12 +54,8 @@ def load_logo(data_dir):
     for image in image_files:
         image_file = os.path.join(data_dir, image)
         try:
-            image_data = (ndimage.imread(image_file).astype(np.float32) -
-                          PIXEL_DEPTH / 2) / PIXEL_DEPTH
-            if image_data.ndim == 2:
-                image_data = np.reshape(image_data, (common.CNN_IN_HEIGHT,
-                                                     common.CNN_IN_WIDTH,
-                                                     common.CNN_IN_CH))
+            image_data = cv2.imread(image_file)
+            image_data = preprocess.scaling(image_data)
             if image_data.shape != (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
                                     common.CNN_IN_CH):
                 raise Exception(
