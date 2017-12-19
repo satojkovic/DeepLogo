@@ -31,6 +31,7 @@ from scipy import ndimage
 import re
 import common
 import model
+import preprocess
 
 TRAIN_DIR = 'flickr_logos_27_dataset'
 CROPPED_AUG_IMAGE_DIR = os.path.join(
@@ -78,12 +79,13 @@ def main():
     print("Test image:", test_image_fn)
 
     # Open and resize a test image
-    test_image_org = (ndimage.imread(test_image_fn).astype(np.float32) -
-                      PIXEL_DEPTH / 2) / PIXEL_DEPTH
+    test_image_org = ndimage.imread(test_image_fn)
+    test_image_org = preprocess.scaling(test_image_org)
     test_image_org.resize((common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
                            common.CNN_IN_CH))
     test_image = test_image_org.reshape(
-        (1, common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH, common.CNN_IN_CH))
+        (1, common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
+         common.CNN_IN_CH)).astype(np.float32)
 
     # Training model
     graph = tf.Graph()

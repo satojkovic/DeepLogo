@@ -29,6 +29,7 @@ from scipy import ndimage
 from six.moves import cPickle as pickle
 import re
 import common
+import preprocess
 
 PIXEL_DEPTH = 255.0
 TRAIN_DIR = 'flickr_logos_27_dataset'
@@ -52,8 +53,8 @@ def load_logo(data_dir):
     for image in image_files:
         image_file = os.path.join(data_dir, image)
         try:
-            image_data = (ndimage.imread(image_file).astype(float) -
-                          PIXEL_DEPTH / 2) / PIXEL_DEPTH
+            image_data = ndimage.imread(image_file)
+            image_data = preprocess.scaling(image_data)
             if image_data.shape != (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
                                     common.CNN_IN_CH):
                 raise Exception(
