@@ -83,6 +83,8 @@ def aug_pos(annot, im):
         cy = rect['cy'] + sy
         cropped_im = im[cy - rect['hgt'] // 2:cy + rect['hgt'] // 2,
                         cx - rect['wid'] // 2:cx + rect['wid'] // 2]
+        if cropped_im.shape[0] <= 0 or cropped_im.shape[1] <= 0:
+            continue
         # The requested size in pixels, as a 2-tuple (width, height)
         resized_im = cv2.resize(cropped_im, (common.CNN_IN_WIDTH,
                                              common.CNN_IN_HEIGHT))
@@ -102,6 +104,8 @@ def aug_scale(annot, im):
         h = int(rect['hgt'] * s)
         cropped_im = im[rect['cy'] - h // 2:rect['cy'] + h // 2,
                         rect['cx'] - w // 2:rect['cx'] + w // 2]
+        if cropped_im.shape[0] == 0 or cropped_im.shape[1] == 0:
+            continue
         resized_im = cv2.resize(cropped_im, (common.CNN_IN_WIDTH,
                                              common.CNN_IN_HEIGHT))
         aug_scale_ims.append(resized_im)
@@ -120,6 +124,8 @@ def aug_rot(annot, im):
         cropped_im = rotated_im[
             rect['cy'] - rect['hgt'] // 2:rect['cy'] + rect['hgt'] // 2,
             rect['cx'] - rect['wid'] // 2:rect['cx'] + rect['wid'] // 2]
+        if cropped_im.shape[0] <= 0 or cropped_im.shape[1] <= 0:
+            continue
         resized_im = cv2.resize(cropped_im, (common.CNN_IN_WIDTH,
                                              common.CNN_IN_HEIGHT))
         aug_rot_ims.append(resized_im)
