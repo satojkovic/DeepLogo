@@ -27,8 +27,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import sys
-from scipy import ndimage
-import re
+import cv2
 import common
 import model
 import preprocess
@@ -79,7 +78,7 @@ def main():
     print("Test image:", test_image_fn)
 
     # Open and resize a test image
-    test_image_org = ndimage.imread(test_image_fn)
+    test_image_org = cv2.imread(test_image_fn)
     test_image_org = preprocess.scaling(test_image_org)
     test_image_org.resize((common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
                            common.CNN_IN_CH))

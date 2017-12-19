@@ -24,7 +24,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import os
-from PIL import Image
 from collections import defaultdict
 from itertools import product
 from sklearn.model_selection import train_test_split
@@ -32,6 +31,8 @@ import shutil
 import re
 import glob
 import common
+import cv2
+from scipy import ndimage  # use rotate function
 
 DATA_AUG_POS_SHIFT_MIN = -2
 DATA_AUG_POS_SHIFT_MAX = 2
@@ -80,14 +81,13 @@ def aug_pos(annot, im):
             range(DATA_AUG_POS_SHIFT_MIN, DATA_AUG_POS_SHIFT_MAX)):
         cx = rect['cx'] + sx
         cy = rect['cy'] + sy
-        cropped_im = im.crop((cx - rect['wid'] // 2, cy - rect['hgt'] // 2,
-                              cx + rect['wid'] // 2, cy + rect['hgt'] // 2))
+        cropped_im = im[cy - rect['hgt'] // 2:cy + rect['hgt'] // 2,
+                        cx - rect['wid'] // 2:cx + rect['wid'] // 2]
         # The requested size in pixels, as a 2-tuple (width, height)
-        resized_im = cropped_im.resize((common.CNN_IN_WIDTH,
-                                        common.CNN_IN_HEIGHT))
+        resized_im = cv2.resize(cropped_im, (common.CNN_IN_WIDTH,
+                                             common.CNN_IN_HEIGHT))
         aug_pos_ims.append(resized_im)
         aug_pos_suffixes.append('p' + str(sx) + str(sy))
-        cropped_im.close()
 
     return aug_pos_ims, aug_pos_suffixes
 
@@ -100,13 +100,12 @@ def aug_scale(annot, im):
     for s in DATA_AUG_SCALES:
         w = int(rect['wid'] * s)
         h = int(rect['hgt'] * s)
-        cropped_im = im.crop((rect['cx'] - w // 2, rect['cy'] - h // 2,
-                              rect['cx'] + w // 2, rect['cy'] + h // 2))
-        resized_im = cropped_im.resize((common.CNN_IN_WIDTH,
-                                        common.CNN_IN_HEIGHT))
+        cropped_im = im[rect['cy'] - h // 2:rect['cy'] + h // 2,
+                        rect['cx'] - w // 2:rect['cx'] + w // 2]
+        resized_im = cv2.resize(cropped_im, (common.CNN_IN_WIDTH,
+                                             common.CNN_IN_HEIGHT))
         aug_scale_ims.append(resized_im)
         aug_scale_suffixes.append('s' + str(s))
-        cropped_im.close()
 
     return aug_scale_ims, aug_scale_suffixes
 
@@ -117,24 +116,23 @@ def aug_rot(annot, im):
 
     rect = get_rect(annot)
     for r in range(DATA_AUG_ROT_MIN, DATA_AUG_ROT_MAX):
-        rotated_im = im.rotate(r)
-        cropped_im = rotated_im.crop(
-            (rect['cx'] - rect['wid'] // 2, rect['cy'] - rect['hgt'] // 2,
-             rect['cx'] + rect['wid'] // 2, rect['cy'] + rect['hgt'] // 2))
-        resized_im = cropped_im.resize((common.CNN_IN_WIDTH,
-                                        common.CNN_IN_HEIGHT))
+        rotated_im = ndimage.rotate(im, r, reshape=False)
+        cropped_im = rotated_im[
+            rect['cy'] - rect['hgt'] // 2:rect['cy'] + rect['hgt'] // 2,
+            rect['cx'] - rect['wid'] // 2:rect['cx'] + rect['wid'] // 2]
+        resized_im = cv2.resize(cropped_im, (common.CNN_IN_WIDTH,
+                                             common.CNN_IN_HEIGHT))
         aug_rot_ims.append(resized_im)
         aug_rot_suffixes.append('r' + str(r))
-        rotated_im.close()
-        cropped_im.close()
 
     return aug_rot_ims, aug_rot_suffixes
 
 
 def crop_logos(annot, im):
     x1, y1, x2, y2 = rect_coord(annot[3:])
-    cropped_im = im.crop((x1, y1, x2, y2))
-    cropped_im = cropped_im.resize((common.CNN_IN_WIDTH, common.CNN_IN_HEIGHT))
+    cropped_im = im[y1:y2, x1:x2]
+    cropped_im = cv2.resize(cropped_im, (common.CNN_IN_WIDTH,
+                                         common.CNN_IN_HEIGHT))
     cropped_suffix = 'p00'
     return [cropped_im], [cropped_suffix]
 
@@ -171,13 +169,7 @@ def save_im(annot, cnt, *args):
                 fn.split('.')[0], class_name, train_subset_class, str(cnt),
                 suffix
             ]) + os.path.splitext(fn)[1]
-            im.save(os.path.join(dst_dir, save_fn))
-
-
-def close_im(*args):
-    for ims in args:
-        for im in ims:
-            im.close()
+            cv2.imwrite(os.path.join(dst_dir, save_fn), im)
 
 
 def crop_and_aug(annot_train):
@@ -193,7 +185,7 @@ def crop_and_aug(annot_train):
             continue
 
         # open an image
-        im = Image.open(os.path.join(TRAIN_IMAGE_DIR, fn))
+        im = cv2.imread(os.path.join(TRAIN_IMAGE_DIR, fn))
 
         # normal cropping
         cropped_ims, cropped_suffixes = crop_logos(annot, im)
@@ -211,9 +203,6 @@ def crop_and_aug(annot_train):
         save_im(annot, cnt_per_file[fn], [cropped_ims, cropped_suffixes],
                 [shifted_ims, shifted_suffixes], [scaled_ims, scaled_suffixes],
                 [rotated_ims, rotated_suffixes])
-
-        # close image file
-        close_im([im], cropped_ims, shifted_ims, scaled_ims, rotated_ims)
 
 
 def crop_none():
@@ -235,17 +224,15 @@ def crop_none():
         ]
         none_imgs = np.random.choice(none_imgs, 10)
         for none_img in none_imgs:
-            im = Image.open(none_img)
-            if im.mode != "RGB":
-                im = im.convert("RGB")
-            w, h = im.size
+            im = cv2.imread(none_img)
+            h, w, _ = im.shape
             cw, ch = w // 2, h // 2
             # The crop rectangle, as a (left, upper, right, lower)-tuple
-            cropped_im = im.crop((
-                cw - common.CNN_IN_WIDTH // 2, ch - common.CNN_IN_HEIGHT // 2,
-                cw + common.CNN_IN_WIDTH // 2, ch + common.CNN_IN_HEIGHT // 2))
+            cropped_im = im[
+                ch - common.CNN_IN_HEIGHT // 2:ch + common.CNN_IN_HEIGHT // 2,
+                cw - common.CNN_IN_WIDTH // 2:cw + common.CNN_IN_WIDTH // 2]
             dst_fn = os.path.basename(none_img)
-            cropped_im.save(os.path.join(dst_dir, dst_fn))
+            cv2.imwrite(os.path.join(dst_dir, dst_fn), cropped_im)
 
 
 def crop_and_aug_with_none(annot_train, with_none=False):
