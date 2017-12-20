@@ -29,6 +29,7 @@ import os
 import sys
 import cv2
 import skimage.io
+import skimage.transform
 import common
 import model
 import preprocess
@@ -87,8 +88,8 @@ def main():
         test_image_org = skimage.io.imread(test_image_fn)
     if test_image_org.shape != (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
                                 common.CNN_IN_CH):
-        test_image_org.resize((common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
-                               common.CNN_IN_CH))
+        test_image_org = skimage.transform.resize(test_image_org, (
+            common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH, common.CNN_IN_CH))
     test_image_org = preprocess.scaling(test_image_org)
     test_image = test_image_org.reshape(
         (1, common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
