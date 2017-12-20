@@ -54,6 +54,9 @@ def load_logo(data_dir):
         try:
             if common.CNN_IN_CH == 1:
                 image_data = skimage.io.imread(image_file, as_grey=True)
+                image_data = image_data.reshape(common.CNN_IN_HEIGHT,
+                                                common.CNN_IN_WIDTH,
+                                                common.CNN_IN_CH)
             else:
                 image_data = skimage.io.imread(image_file)
             image_data = preprocess.scaling(image_data)
