@@ -80,9 +80,11 @@ def main():
 
     # Open and resize a test image
     test_image_org = skimage.io.imread(test_image_fn)
+    if test_image_org.shape != (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
+                                common.CNN_IN_CH):
+        test_image_org.resize((common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
+                               common.CNN_IN_CH))
     test_image_org = preprocess.scaling(test_image_org)
-    test_image_org.resize((common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
-                           common.CNN_IN_CH))
     test_image = test_image_org.reshape(
         (1, common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
          common.CNN_IN_CH)).astype(np.float32)
