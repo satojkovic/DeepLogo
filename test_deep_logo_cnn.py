@@ -27,10 +27,13 @@ import tensorflow as tf
 import numpy as np
 import os
 import sys
-from scipy import ndimage
-import re
+import cv2
+import skimage.io
+import skimage.transform
 import common
 import model
+import preprocess
+from scipy.misc import imresize
 
 TRAIN_DIR = 'flickr_logos_27_dataset'
 CROPPED_AUG_IMAGE_DIR = os.path.join(
@@ -78,12 +81,21 @@ def main():
     print("Test image:", test_image_fn)
 
     # Open and resize a test image
-    test_image_org = (ndimage.imread(test_image_fn).astype(np.float32) -
-                      PIXEL_DEPTH / 2) / PIXEL_DEPTH
-    test_image_org.resize((common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
-                           common.CNN_IN_CH))
+    if common.CNN_IN_CH == 1:
+        test_image_org = skimage.io.imread(test_image_fn, as_grey=True)
+        test_image_org = test_image_org.reshape(
+            common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH, common.CNN_IN_CH)
+    else:
+        test_image_org = skimage.io.imread(test_image_fn)
+    if test_image_org.shape != (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
+                                common.CNN_IN_CH):
+        test_image_org = imresize(
+            test_image_org, (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH),
+            interp='bicubic')
+    test_image_org = preprocess.scaling(test_image_org)
     test_image = test_image_org.reshape(
-        (1, common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH, common.CNN_IN_CH))
+        (1, common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
+         common.CNN_IN_CH)).astype(np.float32)
 
     # Training model
     graph = tf.Graph()
@@ -108,7 +120,7 @@ def main():
         tf_test_image = tf.constant(test_image)
 
         # model
-        logits = model.cnn(tf_test_image, model_params)
+        logits = model.cnn(tf_test_image, model_params, keep_prob=1.0)
         test_pred = tf.nn.softmax(logits)
 
         # Restore ops

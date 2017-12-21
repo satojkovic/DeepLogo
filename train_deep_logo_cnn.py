@@ -37,7 +37,7 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string(
     "train_dir", "flickr_logos_27_dataset",
     "Directory where to write event logs and checkpoint.")
-tf.app.flags.DEFINE_integer("max_steps", 10001, "Number of batches to run.")
+tf.app.flags.DEFINE_integer("max_steps", 20001, "Number of batches to run.")
 tf.app.flags.DEFINE_integer("image_width", common.CNN_IN_WIDTH,
                             "A width of an input image.")
 tf.app.flags.DEFINE_integer("image_height", common.CNN_IN_HEIGHT,
@@ -127,7 +127,7 @@ def main():
         tf_test_dataset = tf.constant(test_dataset)
 
         # Training computation
-        logits = model.cnn(tf_train_dataset, model_params)
+        logits = model.cnn(tf_train_dataset, model_params, keep_prob=0.5)
         with tf.name_scope('loss'):
             loss = tf.reduce_sum(
                 tf.nn.softmax_cross_entropy_with_logits(
@@ -138,9 +138,9 @@ def main():
         # Predictions for the training, validation, and test data
         train_prediction = tf.nn.softmax(logits)
         valid_prediction = tf.nn.softmax(
-            model.cnn(tf_valid_dataset, model_params))
+            model.cnn(tf_valid_dataset, model_params, keep_prob=1.0))
         test_prediction = tf.nn.softmax(
-            model.cnn(tf_test_dataset, model_params))
+            model.cnn(tf_test_dataset, model_params, keep_prob=1.0))
         # Merge all summaries
         merged = tf.summary.merge_all()
         train_writer = tf.summary.FileWriter(FLAGS.train_dir + '/train')

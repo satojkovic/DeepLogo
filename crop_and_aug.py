@@ -24,28 +24,31 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import os
-from PIL import Image
-from collections import defaultdict
+from collections import defaultdict, deque
 from itertools import product
 from sklearn.model_selection import train_test_split
 import shutil
-import re
 import glob
 import common
+import skimage.io
+from skimage import transform as sktf
+from scipy.misc import imresize
+import warnings
+import cv2
 
-DATA_AUG_POS_SHIFT_MIN = -2
-DATA_AUG_POS_SHIFT_MAX = 2
-DATA_AUG_SCALES = [0.9, 1.1]
-DATA_AUG_ROT_MIN = -15
-DATA_AUG_ROT_MAX = 15
+MAX_DATA_AUG_PER_LINE = 30
+MAX_SHIFT_WIDTH = common.CNN_IN_WIDTH * 0.1
+MAX_SHIFT_HEIGHT = common.CNN_IN_HEIGHT * 0.1
+MAX_ROT_DEG = 10
+MIN_ROT_DEG = -10
+MAX_SCALE_RATE = 0.95
+MIN_SCALE_RATE = 0.85
 
 TRAIN_DIR = 'flickr_logos_27_dataset'
 TRAIN_IMAGE_DIR = os.path.join(TRAIN_DIR, 'flickr_logos_27_dataset_images')
 CROPPED_AUG_IMAGE_DIR = os.path.join(
     TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
 ANNOT_FILE = 'flickr_logos_27_dataset_training_set_annotation.txt'
-NONE_IMAGE_DIR = os.path.join(TRAIN_DIR, 'SUN397')
-NUM_OF_NONE_IMAGES = 10000
 
 
 def parse_annot(annot):
@@ -70,71 +73,11 @@ def get_rect(annot):
     return rect
 
 
-def aug_pos(annot, im):
-    aug_pos_ims = []
-    aug_pos_suffixes = []
-
-    rect = get_rect(annot)
-    for sx, sy in product(
-            range(DATA_AUG_POS_SHIFT_MIN, DATA_AUG_POS_SHIFT_MAX),
-            range(DATA_AUG_POS_SHIFT_MIN, DATA_AUG_POS_SHIFT_MAX)):
-        cx = rect['cx'] + sx
-        cy = rect['cy'] + sy
-        cropped_im = im.crop((cx - rect['wid'] // 2, cy - rect['hgt'] // 2,
-                              cx + rect['wid'] // 2, cy + rect['hgt'] // 2))
-        # The requested size in pixels, as a 2-tuple (width, height)
-        resized_im = cropped_im.resize((common.CNN_IN_WIDTH,
-                                        common.CNN_IN_HEIGHT))
-        aug_pos_ims.append(resized_im)
-        aug_pos_suffixes.append('p' + str(sx) + str(sy))
-        cropped_im.close()
-
-    return aug_pos_ims, aug_pos_suffixes
-
-
-def aug_scale(annot, im):
-    aug_scale_ims = []
-    aug_scale_suffixes = []
-
-    rect = get_rect(annot)
-    for s in DATA_AUG_SCALES:
-        w = int(rect['wid'] * s)
-        h = int(rect['hgt'] * s)
-        cropped_im = im.crop((rect['cx'] - w // 2, rect['cy'] - h // 2,
-                              rect['cx'] + w // 2, rect['cy'] + h // 2))
-        resized_im = cropped_im.resize((common.CNN_IN_WIDTH,
-                                        common.CNN_IN_HEIGHT))
-        aug_scale_ims.append(resized_im)
-        aug_scale_suffixes.append('s' + str(s))
-        cropped_im.close()
-
-    return aug_scale_ims, aug_scale_suffixes
-
-
-def aug_rot(annot, im):
-    aug_rot_ims = []
-    aug_rot_suffixes = []
-
-    rect = get_rect(annot)
-    for r in range(DATA_AUG_ROT_MIN, DATA_AUG_ROT_MAX):
-        rotated_im = im.rotate(r)
-        cropped_im = rotated_im.crop(
-            (rect['cx'] - rect['wid'] // 2, rect['cy'] - rect['hgt'] // 2,
-             rect['cx'] + rect['wid'] // 2, rect['cy'] + rect['hgt'] // 2))
-        resized_im = cropped_im.resize((common.CNN_IN_WIDTH,
-                                        common.CNN_IN_HEIGHT))
-        aug_rot_ims.append(resized_im)
-        aug_rot_suffixes.append('r' + str(r))
-        rotated_im.close()
-        cropped_im.close()
-
-    return aug_rot_ims, aug_rot_suffixes
-
-
 def crop_logos(annot, im):
     x1, y1, x2, y2 = rect_coord(annot[3:])
-    cropped_im = im.crop((x1, y1, x2, y2))
-    cropped_im = cropped_im.resize((common.CNN_IN_WIDTH, common.CNN_IN_HEIGHT))
+    cropped_im = im[y1:y2, x1:x2]
+    cropped_im = cv2.resize(cropped_im, (common.CNN_IN_WIDTH,
+                                         common.CNN_IN_HEIGHT))
     cropped_suffix = 'p00'
     return [cropped_im], [cropped_suffix]
 
@@ -160,92 +103,110 @@ def is_skip(annot_part):
         return False
 
 
-def save_im(annot, cnt, *args):
+def get_annot_rect(annot):
+    return np.array(list(map(lambda x: int(x), annot[3:])))
+
+
+def crop_image(img, rect):
+    return img[rect[1]:rect[3], rect[0]:rect[2]]
+
+
+def resize_img(img, size=(common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH)):
+    return imresize(img, size, interp='bicubic')
+
+
+def make_affine_transform():
+    shift_w = int(np.ceil(np.random.rand() * MAX_SHIFT_WIDTH))
+    shift_h = int(np.ceil(np.random.rand() * MAX_SHIFT_HEIGHT))
+    rot_deg = np.random.uniform(MIN_ROT_DEG, MAX_ROT_DEG)
+    rot_rad = rot_deg * np.pi / 180.0
+    scale_rate = np.random.uniform(MIN_SCALE_RATE, MAX_SCALE_RATE)
+    params = {}
+    params['shift_w'] = shift_w
+    params['shift_h'] = shift_h
+    params['rot_deg'] = rot_deg
+    params['rot_rad'] = rot_rad
+    params['scale_rate'] = scale_rate
+
+    mat = sktf.AffineTransform(
+        translation=(shift_w, shift_h),
+        rotation=rot_rad,
+        scale=(scale_rate, scale_rate))
+
+    return mat, params
+
+
+def save_transformed_imgs(imgs, annot, aug_params, line_no):
     fn, class_name, train_subset_class = parse_annot(annot)
+    root, ext = os.path.splitext(fn)
     dst_dir = os.path.join(CROPPED_AUG_IMAGE_DIR, class_name)
     if not os.path.exists(dst_dir):
         os.makedirs(dst_dir)
-    for i, arg in enumerate(args):
-        for im, suffix in zip(arg[0], arg[1]):
-            save_fn = '_'.join([
-                fn.split('.')[0], class_name, train_subset_class, str(cnt),
-                suffix
-            ]) + os.path.splitext(fn)[1]
-            im.save(os.path.join(dst_dir, save_fn))
+
+    for i, img in enumerate(imgs):
+        if aug_params[i]['rot_deg'] < 0:
+            rot_deg = 'm' + format(np.abs(aug_params[i]['rot_deg']), '.1f')
+        else:
+            rot_deg = format(aug_params[i]['rot_deg'], '.1f')
+
+        save_fn = '_'.join([
+            str(line_no), str(i), root, class_name, train_subset_class,
+            'shiftW' + str(aug_params[i]['shift_w']),
+            'shiftH' + str(aug_params[i]['shift_h']), 'rot' + rot_deg,
+            'scale' + format(aug_params[i]['scale_rate'], '.2f')
+        ]) + ext
+        skimage.io.imsave(os.path.join(dst_dir, save_fn), img)
 
 
-def close_im(*args):
-    for ims in args:
-        for im in ims:
-            im.close()
+def crop_and_aug_random(annot_train):
+    # Data augmentation results
+    aug_results = deque(maxlen=MAX_DATA_AUG_PER_LINE)
+    aug_params = deque(maxlen=MAX_DATA_AUG_PER_LINE)
+    aug_keys = ['shift_w', 'shift_h', 'rot_deg', 'rot_rad', 'scale_rate']
+    cnt_per_line = defaultdict(int)
 
-
-def crop_and_aug(annot_train):
-    cnt_per_file = defaultdict(int)
-    for annot in annot_train:
-        # for generating a file name
+    for i, annot in enumerate(annot_train):
+        # Get image file name
         fn, _, _ = parse_annot(annot)
-        cnt_per_file[fn] += 1
 
-        # skip if width or height equal zero
+        # Skip if width or height equal zero
         if is_skip(annot[3:]):
             print('Skip: ', fn)
             continue
 
-        # open an image
-        im = Image.open(os.path.join(TRAIN_IMAGE_DIR, fn))
+        # Read image by skimage
+        img = skimage.io.imread(os.path.join(TRAIN_IMAGE_DIR, fn))
+        img = skimage.exposure.equalize_adapthist(img)
 
-        # normal cropping
-        cropped_ims, cropped_suffixes = crop_logos(annot, im)
+        # Crop logo area
+        annot_rect = get_annot_rect(annot)
+        cropped_img = crop_image(img, annot_rect)
 
-        # augment by shifting a center
-        shifted_ims, shifted_suffixes = aug_pos(annot, im)
+        # Resize cropped image
+        resized_cropped_img = resize_img(cropped_img)
 
-        # augment by scaling
-        scaled_ims, scaled_suffixes = aug_scale(annot, im)
+        aug_results.append(resized_cropped_img)
+        normal_params = {}
+        for key in aug_keys:
+            normal_params[key] = 0
+        aug_params.append(normal_params)
+        cnt_per_line[i] += 1
 
-        # augment by rotation
-        rotated_ims, rotated_suffixes = aug_rot(annot, im)
+        # Data augmentation by affine transformation
+        while cnt_per_line[i] < MAX_DATA_AUG_PER_LINE:
+            affine_mat, params = make_affine_transform()
+            transformed_img = sktf.warp(cropped_img, affine_mat, mode='edge')
+            transformed_img = resize_img(transformed_img)
+            aug_results.append(transformed_img)
+            aug_params.append(params)
+            cnt_per_line[i] += 1
 
-        # save images
-        save_im(annot, cnt_per_file[fn], [cropped_ims, cropped_suffixes],
-                [shifted_ims, shifted_suffixes], [scaled_ims, scaled_suffixes],
-                [rotated_ims, rotated_suffixes])
+        # Save transformed images
+        save_transformed_imgs(aug_results, annot, aug_params, i)
 
-        # close image file
-        close_im([im], cropped_ims, shifted_ims, scaled_ims, rotated_ims)
-
-
-def crop_none():
-    none_img_classes = [
-        cn.decode('utf-8')
-        for cn in np.loadtxt(
-            os.path.join(NONE_IMAGE_DIR, 'ClassName.txt'), dtype='a')
-    ]
-
-    dst_dir = os.path.join(CROPPED_AUG_IMAGE_DIR, 'None')
-    if not os.path.exists(dst_dir):
-        os.makedirs(dst_dir)
-
-    for none_class in none_img_classes:
-        none_dir = os.path.join(NONE_IMAGE_DIR, none_class[1:])
-        none_imgs = [
-            os.path.join(none_dir, img) for img in os.listdir(none_dir)
-            if re.search('\.jpg', img)
-        ]
-        none_imgs = np.random.choice(none_imgs, 10)
-        for none_img in none_imgs:
-            im = Image.open(none_img)
-            if im.mode != "RGB":
-                im = im.convert("RGB")
-            w, h = im.size
-            cw, ch = w // 2, h // 2
-            # The crop rectangle, as a (left, upper, right, lower)-tuple
-            cropped_im = im.crop((
-                cw - common.CNN_IN_WIDTH // 2, ch - common.CNN_IN_HEIGHT // 2,
-                cw + common.CNN_IN_WIDTH // 2, ch + common.CNN_IN_HEIGHT // 2))
-            dst_fn = os.path.basename(none_img)
-            cropped_im.save(os.path.join(dst_dir, dst_fn))
+        # Clear data augmentation results
+        aug_results.clear()
+        aug_params.clear()
 
 
 def crop_and_aug_with_none(annot_train, with_none=False):
@@ -254,11 +215,7 @@ def crop_and_aug_with_none(annot_train, with_none=False):
         os.makedirs(CROPPED_AUG_IMAGE_DIR)
 
     # crop images and apply augmentation
-    crop_and_aug(annot_train)
-
-    # crop images of none class
-    if with_none:
-        crop_none()
+    crop_and_aug_random(annot_train)
 
     # print results
     org_imgs = [img for img in os.listdir(TRAIN_IMAGE_DIR)]
@@ -302,14 +259,19 @@ def do_train_test_split():
 
 
 def main():
-    annot_train = np.loadtxt(os.path.join(TRAIN_DIR, ANNOT_FILE), dtype='a')
-    print('train_annotation: %d, %d ' % (annot_train.shape))
+    with warnings.catch_warnings():
+        # Supress low contrast warnings
+        warnings.simplefilter("ignore")
 
-    # cropping and data augmentation
-    crop_and_aug_with_none(annot_train)
+        annot_train = np.loadtxt(
+            os.path.join(TRAIN_DIR, ANNOT_FILE), dtype='a')
+        print('train_annotation: %d, %d ' % (annot_train.shape))
 
-    # train_test_split
-    do_train_test_split()
+        # cropping and data augmentation
+        crop_and_aug_with_none(annot_train)
+
+        # train_test_split
+        do_train_test_split()
 
 
 if __name__ == '__main__':

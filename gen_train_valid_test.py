@@ -25,10 +25,10 @@
 
 import numpy as np
 import os
-from scipy import ndimage
+import skimage.io
 from six.moves import cPickle as pickle
-import re
 import common
+import preprocess
 
 PIXEL_DEPTH = 255.0
 TRAIN_DIR = 'flickr_logos_27_dataset'
@@ -52,8 +52,14 @@ def load_logo(data_dir):
     for image in image_files:
         image_file = os.path.join(data_dir, image)
         try:
-            image_data = (ndimage.imread(image_file).astype(float) -
-                          PIXEL_DEPTH / 2) / PIXEL_DEPTH
+            if common.CNN_IN_CH == 1:
+                image_data = skimage.io.imread(image_file, as_grey=True)
+                image_data = image_data.reshape(common.CNN_IN_HEIGHT,
+                                                common.CNN_IN_WIDTH,
+                                                common.CNN_IN_CH)
+            else:
+                image_data = skimage.io.imread(image_file)
+            image_data = preprocess.scaling(image_data)
             if image_data.shape != (common.CNN_IN_HEIGHT, common.CNN_IN_WIDTH,
                                     common.CNN_IN_CH):
                 raise Exception(
@@ -90,7 +96,7 @@ def maybe_pickle(data_dirs, force=False):
     return dataset_names
 
 
-def make_arrays(nb_rows, image_width, image_height, image_ch=1):
+def make_arrays(nb_rows, image_width, image_height, image_ch):
     if nb_rows:
         dataset = np.ndarray(
             (nb_rows, image_height, image_width, image_ch), dtype=np.float32)
