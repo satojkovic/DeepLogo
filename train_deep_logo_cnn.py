@@ -37,7 +37,7 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string(
     "train_dir", "flickr_logos_27_dataset",
     "Directory where to write event logs and checkpoint.")
-tf.app.flags.DEFINE_integer("max_steps", 10001, "Number of batches to run.")
+tf.app.flags.DEFINE_integer("max_steps", 20001, "Number of batches to run.")
 tf.app.flags.DEFINE_integer("image_width", common.CNN_IN_WIDTH,
                             "A width of an input image.")
 tf.app.flags.DEFINE_integer("image_height", common.CNN_IN_HEIGHT,
