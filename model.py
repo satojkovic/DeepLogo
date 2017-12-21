@@ -57,7 +57,7 @@ def params():
     return params
 
 
-def cnn(data, model_params):
+def cnn(data, model_params, keep_prob):
     # First layer
     h_conv1 = tf.nn.relu(
         tf.nn.conv2d(
@@ -87,6 +87,7 @@ def cnn(data, model_params):
     h_fc1 = tf.nn.relu(
         tf.matmul(conv_layer_flat, model_params['w_fc1']) +
         model_params['b_fc1'])
+    h_fc1 = tf.nn.dropout(h_fc1, keep_prob)
 
     # Output layer
     out = tf.matmul(h_fc1, model_params['w_fc2']) + model_params['b_fc2']

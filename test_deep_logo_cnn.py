@@ -120,7 +120,7 @@ def main():
         tf_test_image = tf.constant(test_image)
 
         # model
-        logits = model.cnn(tf_test_image, model_params)
+        logits = model.cnn(tf_test_image, model_params, keep_prob=1.0)
         test_pred = tf.nn.softmax(logits)
 
         # Restore ops
