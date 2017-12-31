@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016 satojkovic
+# Copyright (c) 2017 satojkovic
 
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -23,27 +23,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
+import numpy as np
 
-__all__ = ('CLASS_NAME', 'CNN_IN_WIDTH', 'CNN_IN_HEIGHT', 'CNN_IN_CH',
-           'TRAIN_DIR', 'TRAIN_IMAGE_DIR', 'CROPPED_AUG_IMAGE_DIR',
-           'ANNOT_FILE', 'ANNOT_FILE_WITH_BG')
 
-CLASS_NAME = [
-    'Adidas', 'Apple', 'BMW', 'Citroen', 'Cocacola', 'DHL', 'Fedex', 'Ferrari',
-    'Ford', 'Google', 'HP', 'Heineken', 'Intel', 'McDonalds', 'Mini', 'Nbc',
-    'Nike', 'Pepsi', 'Porsche', 'Puma', 'RedBull', 'Sprite', 'Starbucks',
-    'Texaco', 'Unicef', 'Vodafone', 'Yahoo', 'Background'
-]
+def parse_annot(annot):
+    fn = annot[0].decode('utf-8')
+    class_name = annot[1].decode('utf-8')
+    train_subset_class = annot[2].decode('utf-8')
+    return fn, class_name, train_subset_class
 
-CNN_IN_WIDTH = 64
-CNN_IN_HEIGHT = 32
-CNN_IN_CH = 3
 
-TRAIN_DIR = 'flickr_logos_27_dataset'
-TRAIN_IMAGE_DIR = os.path.join(TRAIN_DIR, 'flickr_logos_27_dataset_images')
-CROPPED_AUG_IMAGE_DIR = os.path.join(
-    TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
-ANNOT_FILE = os.path.join(
-    TRAIN_DIR, 'flickr_logos_27_dataset_training_set_annotation.txt')
-ANNOT_FILE_WITH_BG = os.path.join(TRAIN_DIR, 'train_annot_with_bg_class.txt')
+def get_annot_rect(annot):
+    return np.array(list(map(lambda x: int(x), annot[3:])))
