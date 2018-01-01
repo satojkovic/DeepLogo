@@ -88,6 +88,7 @@ def main():
     img_fn = os.path.abspath(args.img_fn)
     if not os.path.exists(img_fn):
         print('Not found: {}'.format(img_fn))
+        sys.exit(-1)
     else:
         print('Target image: {}'.format(img_fn))
 
