@@ -67,28 +67,6 @@ def get_bg_proposals(object_proposals, annot):
     return bg_proposals
 
 
-def get_object_proposals(img, scale=500, sigma=0.9, min_size=10):
-    # Selective search
-    img_lbl, regions = selectivesearch.selective_search(
-        img, scale=scale, sigma=sigma, min_size=min_size)
-
-    candidates = set()
-    for r in regions:
-        # excluding same rectangle (with different segments)
-        if r['rect'] in candidates:
-            continue
-        # excluding regions smaller than 2000 pixels
-        if r['size'] < 2000:
-            continue
-        # excluding large rectangle
-        if r['rect'][0] + r['rect'][2] + 0.1 * img.shape[1] > img.shape[1] \
-           or r['rect'][1] + r['rect'][3] + 0.1 * img.shape[0] > img.shape[0]:
-            continue
-        candidates.add(r['rect'])
-
-    return candidates
-
-
 def gen_annot_file_line(img_fn, class_name, train_subset_class, rect):
     rect = ' '.join(map(str, rect))
     line = ' '.join([img_fn, class_name, train_subset_class, rect])
@@ -109,7 +87,7 @@ def gen_annot_file_lines(annot):
     img = skimage.io.imread(os.path.join(common.TRAIN_IMAGE_DIR, img_fn))
 
     # Selective search
-    object_proposals = get_object_proposals(img)
+    object_proposals = util.get_object_proposals(img)
     if len(object_proposals) == 0:
         return lines
 
@@ -138,7 +116,6 @@ def main():
     # Multi processing
     results = []
     n_workers = os.cpu_count()
-    n_tasks = annot_train.shape[0]
 
     with ProcessPoolExecutor(n_workers) as executer, open(
             common.ANNOT_FILE_WITH_BG, 'w') as fw:

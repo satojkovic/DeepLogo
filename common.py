@@ -26,8 +26,8 @@
 import os
 
 __all__ = ('CLASS_NAME', 'CNN_IN_WIDTH', 'CNN_IN_HEIGHT', 'CNN_IN_CH',
-           'TRAIN_DIR', 'TRAIN_IMAGE_DIR', 'CROPPED_AUG_IMAGE_DIR',
-           'ANNOT_FILE', 'ANNOT_FILE_WITH_BG')
+           'CNN_SHAPE', 'TRAIN_DIR', 'TRAIN_IMAGE_DIR',
+           'CROPPED_AUG_IMAGE_DIR', 'ANNOT_FILE', 'ANNOT_FILE_WITH_BG')
 
 CLASS_NAME = [
     'Adidas', 'Apple', 'BMW', 'Citroen', 'Cocacola', 'DHL', 'Fedex', 'Ferrari',
@@ -39,6 +39,7 @@ CLASS_NAME = [
 CNN_IN_WIDTH = 64
 CNN_IN_HEIGHT = 32
 CNN_IN_CH = 3
+CNN_SHAPE = (CNN_IN_HEIGHT, CNN_IN_WIDTH, CNN_IN_CH)
 
 TRAIN_DIR = 'flickr_logos_27_dataset'
 TRAIN_IMAGE_DIR = os.path.join(TRAIN_DIR, 'flickr_logos_27_dataset_images')
