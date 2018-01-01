@@ -33,9 +33,9 @@ import preprocess
 PIXEL_DEPTH = 255.0
 PICKLE_FILENAME = 'deep_logo.pickle'
 
-TRAIN_SIZE = 50000  # prune the training data as needed. There are 163169 training files.
+TRAIN_SIZE = 70000
 VALID_SIZE = 5000
-TEST_SIZE = 5000  # There are 54425 test files.
+TEST_SIZE = 5000
 
 
 def load_logo(data_dir):

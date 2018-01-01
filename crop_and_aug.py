@@ -232,7 +232,7 @@ def do_train_test_split():
                 os.path.join(common.CROPPED_AUG_IMAGE_DIR, class_name))
         ]
         # train=0.75, test=0.25
-        train_imgs, test_imgs = train_test_split(imgs)
+        train_imgs, test_imgs = train_test_split(imgs, train_size=0.9)
         # move images to train or test directory
         os.makedirs(
             os.path.join(common.CROPPED_AUG_IMAGE_DIR, class_name, 'train'))
