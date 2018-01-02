@@ -135,7 +135,12 @@ def main():
     for result in nms_results:
         print(result)
         (x, y, w, h) = result['obj_proposal']
-        ax.text(x, y, result['pred_class'], fontsize=15)
+        ax.text(
+            x,
+            y,
+            result['pred_class'],
+            fontsize=13,
+            bbox=dict(facecolor='red', alpha=0.7))
         rect = mpatches.Rectangle(
             (x, y), w, h, fill=False, edgecolor='red', linewidth=1)
         ax.add_patch(rect)
