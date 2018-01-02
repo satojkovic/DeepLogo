@@ -35,9 +35,6 @@ import model
 import preprocess
 from scipy.misc import imresize
 
-TRAIN_DIR = 'flickr_logos_27_dataset'
-CROPPED_AUG_IMAGE_DIR = os.path.join(
-    TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
 PIXEL_DEPTH = 255.0
 
 FLAGS = tf.flags.FLAGS
@@ -71,7 +68,7 @@ def main():
     else:
         # Select a test image from a test directory
         test_dirs = [
-            os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'test')
+            os.path.join(common.CROPPED_AUG_IMAGE_DIR, class_name, 'test')
             for class_name in common.CLASS_NAME
         ]
         test_dir = np.random.choice(test_dirs)

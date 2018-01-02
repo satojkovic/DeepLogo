@@ -31,14 +31,11 @@ import common
 import preprocess
 
 PIXEL_DEPTH = 255.0
-TRAIN_DIR = 'flickr_logos_27_dataset'
-CROPPED_AUG_IMAGE_DIR = os.path.join(
-    TRAIN_DIR, 'flickr_logos_27_dataset_cropped_augmented_images')
 PICKLE_FILENAME = 'deep_logo.pickle'
 
-TRAIN_SIZE = 50000  # prune the training data as needed. There are 163169 training files.
+TRAIN_SIZE = 70000
 VALID_SIZE = 5000
-TEST_SIZE = 5000  # There are 54425 test files.
+TEST_SIZE = 5000
 
 
 def load_logo(data_dir):
@@ -170,11 +167,11 @@ def randomize(dataset, labels):
 
 def main():
     train_dirs = [
-        os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'train')
+        os.path.join(common.CROPPED_AUG_IMAGE_DIR, class_name, 'train')
         for class_name in common.CLASS_NAME
     ]
     test_dirs = [
-        os.path.join(CROPPED_AUG_IMAGE_DIR, class_name, 'test')
+        os.path.join(common.CROPPED_AUG_IMAGE_DIR, class_name, 'test')
         for class_name in common.CLASS_NAME
     ]
 
