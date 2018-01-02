@@ -87,6 +87,8 @@ def nms(recog_results, pred_prob_th=0.99, iou_th=0.5):
     pred_probs = np.array([r['pred_prob'] for r in recog_results])
     cand_idx = np.where(pred_probs > pred_prob_th)[0]
     cand_results = np.array(recog_results)[cand_idx]
+    if len(cand_results) == 0:
+        return nms_results
 
     # Sort in descending order
     cand_nms_idx = update_idx(cand_results)
@@ -96,10 +98,12 @@ def nms(recog_results, pred_prob_th=0.99, iou_th=0.5):
     #
 
     # Pick the result with the largest prob as a prediction
-    pred, cand_results = cand_results[cand_nms_idx[0]], cand_results[
-        cand_nms_idx[1:]]
-    cand_nms_idx = update_idx(cand_results)
+    pred = cand_results[cand_nms_idx[0]]
     nms_results.append(pred)
+    if len(cand_results) == 1:
+        return nms_results
+    cand_results = cand_results[cand_nms_idx[1:]]
+    cand_nms_idx = update_idx(cand_results)
 
     # Discard any remaining results with IoU >= iou_th
     while len(cand_results) > 0:
