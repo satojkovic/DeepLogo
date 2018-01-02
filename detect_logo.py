@@ -119,17 +119,23 @@ def main():
         results.append(
             logo_recognition(sess, crop_image, obj_proposal, graph_params))
 
+    del_idx = []
+    for i, result in enumerate(results):
+        if result['pred_class'] == common.CLASS_NAME[-1]:
+            del_idx.append(i)
+    results = np.delete(results, del_idx)
+
+    # Non-max suppression
+    nms_results = util.nms(results, pred_prob_th=0.999, iou_th=0.4)
+
     # Draw rectangles on the target image
     fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
     ax.imshow(target_image)
 
-    for result in results:
-        if result['pred_class'] == common.CLASS_NAME[-1] or \
-           result['pred_prob'] <= 0.99:
-            continue
-
+    for result in nms_results:
         print(result)
         (x, y, w, h) = result['obj_proposal']
+        ax.text(x, y, result['pred_class'], fontsize=15)
         rect = mpatches.Rectangle(
             (x, y), w, h, fill=False, edgecolor='red', linewidth=1)
         ax.add_patch(rect)

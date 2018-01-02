@@ -32,37 +32,12 @@ import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 
-def iou(obj_proposal, annot_rect):
-    """
-
-    Arguments:
-    obj_proposals -- rectangles of object proposals with coordinates (x, y, w, h)
-    annot_rect -- rectangle of ground truth with coordinates (x1, y1, x2, y2)
-    """
-    xi1 = max(obj_proposal[0], annot_rect[0])
-    yi1 = max(obj_proposal[1], annot_rect[1])
-    xi2 = min(obj_proposal[0] + obj_proposal[2], annot_rect[2])
-    yi2 = min(obj_proposal[1] + obj_proposal[3], annot_rect[3])
-    inter_area = (yi2 - yi1) * (xi2 - xi1)
-
-    # Calculate the union area by using formula: union(A, B) = A + B - inter_area
-    box1_area = obj_proposal[2] * obj_proposal[3]
-    box2_area = (annot_rect[2] - annot_rect[0]) * (
-        annot_rect[3] - annot_rect[1])
-    union_area = box1_area + box2_area - inter_area
-
-    # Compute the IoU
-    iou = inter_area / union_area
-
-    return iou
-
-
 def get_bg_proposals(object_proposals, annot):
     annot_rect = util.get_annot_rect(annot)
 
     bg_proposals = []
     for obj_proposal in object_proposals:
-        if iou(obj_proposal, annot_rect) <= 0.5:
+        if util.iou(obj_proposal, annot_rect) <= 0.5:
             bg_proposals.append(obj_proposal)
     return bg_proposals
 
