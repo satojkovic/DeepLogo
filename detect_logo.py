@@ -126,7 +126,7 @@ def main():
     results = np.delete(results, del_idx)
 
     # Non-max suppression
-    nms_results = util.nms(results, pred_prob_th=0.999, iou_th=0.4)
+    nms_results = util.nms(results, pred_prob_th=0.999999, iou_th=0.4)
 
     # Draw rectangles on the target image
     fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
