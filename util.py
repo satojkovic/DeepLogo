@@ -50,9 +50,9 @@ def get_object_proposals(img, scale=500, sigma=0.9, min_size=10):
         # excluding same rectangle (with different segments)
         if r['rect'] in candidates:
             continue
-        # excluding regions smaller than 500 pixels or larger than 
+        # excluding regions smaller than 500 pixels
         x, y, w, h = r['rect']
-        if r['size'] < 500 or r['size'] > 0.8 * (w * h):
+        if r['size'] < 2000 or w > 0.95 * img.shape[1] or h > 0.95 * img.shape[0]:
             continue
         # excluding the zero-width or zero-height box
         if r['rect'][2] == 0 or r['rect'][3] == 0:
