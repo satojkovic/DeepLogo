@@ -14,13 +14,11 @@ Example detection results are below.
 ![example2](query_set_results/4273898682_DHL.png)
 ![example3](query_set_results/3907703753_Fedex.png)
 ![example4](query_set_results/6651198_McDonalds.png)
-![example5](query_set_results/3489964654_Intel.png)
 ![example6](query_set_results/3198284747_texaco.png)
 
 Here are some failure cases.
 
 ![example7](query_set_results/4288066623_Unicef.png)
-![example8](query_set_results/388978947_BMW.png)
 
 
 ### Usage
