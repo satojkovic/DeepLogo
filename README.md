@@ -14,7 +14,8 @@ Example detection results are below.
 ![example2](query_set_results/4273898682_DHL.png)
 ![example3](query_set_results/3907703753_Fedex.png)
 ![example4](query_set_results/6651198_McDonalds.png)
-![example6](query_set_results/3198284747_texaco.png)
+![example5](query_set_results/401253895_BMW.png)
+![example6](query_set_results/2180367311_Google.png)
 
 Here are some failure cases.
 
