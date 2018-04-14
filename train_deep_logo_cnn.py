@@ -42,7 +42,7 @@ tf.app.flags.DEFINE_integer("image_width", common.CNN_IN_WIDTH,
                             "A width of an input image.")
 tf.app.flags.DEFINE_integer("image_height", common.CNN_IN_HEIGHT,
                             "A height of an input image.")
-tf.app.flags.DEFINE_integer("learning_rate", 0.0001, "Learning rate")
+tf.app.flags.DEFINE_float("learning_rate", 0.0001, "Learning rate")
 tf.app.flags.DEFINE_integer("batch_size", 64, "A batch size")
 tf.app.flags.DEFINE_integer("num_channels", common.CNN_IN_CH,
                             "A number of channels of an input image.")
