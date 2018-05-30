@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import os
 import re
-import shutil
 import imagehash
 from PIL import Image
 

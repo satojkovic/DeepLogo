@@ -25,7 +25,6 @@
 import numpy as np
 import os
 from collections import defaultdict, deque
-from itertools import product
 from sklearn.model_selection import train_test_split
 import shutil
 import glob
