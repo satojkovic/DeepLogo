@@ -1,3 +1,6 @@
+imagehash
 numpy
 scikit-image
 selectivesearch
+six
+tensorflow
