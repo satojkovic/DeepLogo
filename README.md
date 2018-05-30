@@ -22,7 +22,9 @@ Here are some failure cases.
 ![example7](query_set_results/4288066623_Unicef.png)
 
 
-### Usage
+### Usage (Python3)
+
+pip install -r requirements.txt
 
 1. `python gen_bg_class.py`: Generate train\_annot\_with\_bg\_class.txt file. 
 2. `python crop_and_aug.py`: Crop brand logo images from the [flickr27\_logos\_dataset](http://image.ntua.gr/iva/datasets/flickr_logos/) and apply data augmentation method. Finally the dataset consists of 140137 images.
