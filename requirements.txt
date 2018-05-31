@@ -1,6 +1,7 @@
 imagehash
-opencv-python
+matplotlib
 numpy
+opencv-python
 scikit-learn
 scikit-image
 selectivesearch

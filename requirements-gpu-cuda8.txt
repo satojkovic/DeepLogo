@@ -1,4 +1,5 @@
 imagehash
+matplotlib
 numpy
 opencv-python
 scikit-learn
