@@ -1,5 +1,7 @@
 imagehash
+opencv-python
 numpy
+scikit-learn
 scikit-image
 selectivesearch
 six
