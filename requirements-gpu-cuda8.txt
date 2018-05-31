@@ -1,0 +1,6 @@
+imagehash
+numpy
+scikit-image
+selectivesearch
+six
+tensorflow-gpu==1.4.1
