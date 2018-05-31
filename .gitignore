@@ -46,3 +46,6 @@ venv.bak/
 
 ### JetBrains
 .idea/
+
+### Generated outputs
+/flickr_logos_27_dataset/train_annot_with_bg_class.txt
