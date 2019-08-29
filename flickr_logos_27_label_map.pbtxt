@@ -1,0 +1,108 @@
+item {
+  id: 1
+  display_name: "Adidas"
+}
+item {
+  id: 2
+  display_name: "Apple"
+}
+item {
+  id: 3
+  display_name: "BMW"
+}
+item {
+  id: 4
+  display_name: "Citroen"
+}
+item {
+  id: 5
+  display_name: "Cocacola"
+}
+item {
+  id: 6
+  display_name: "DHL"
+}
+item {
+  id: 7
+  display_name: "Fedex"
+}
+item {
+  id: 8
+  display_name: "Ferrari"
+}
+item {
+  id: 9
+  display_name: "Ford"
+}
+item {
+  id: 10
+  display_name: "Google"
+}
+item {
+  id: 11
+  display_name: "HP"
+}
+item {
+  id: 12
+  display_name: "Heineken"
+}
+item {
+  id: 13
+  display_name: "Intel"
+}
+item {
+  id: 14
+  display_name: "McDonalds"
+}
+item {
+  id: 15
+  display_name: "Mini"
+}
+item {
+  id: 16
+  display_name: "Nbc"
+}
+item {
+  id: 17
+  display_name: "Nike"
+}
+item {
+  id: 18
+  display_name: "Pepsi"
+}
+item {
+  id: 19
+  display_name: "Porsche"
+}
+item {
+  id: 20
+  display_name: "Puma"
+}
+item {
+  id: 21
+  display_name: "RedBull"
+}
+item {
+  id: 22
+  display_name: "Sprite"
+}
+item {
+  id: 23
+  display_name: "Starbucks"
+}
+item {
+  id: 24
+  display_name: "Texaco"
+}
+item {
+  id: 25
+  display_name: "Unicef"
+}
+item {
+  id: 26
+  display_name: "Vodafone"
+}
+item {
+  id: 27
+  display_name: "Yahoo"
+}
