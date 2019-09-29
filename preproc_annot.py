@@ -42,11 +42,19 @@ def main():
         for annot in annots[:num_train]:
             f.writelines(annot)
             f.writelines("\n")
+
+    seen = set()
+    num_test = 0
     with open(config.CROPPED_ANNOT_FILE_TEST, 'w') as f:
         for annot in annots[num_train:]:
+            img_fn = annot.split(',')[0]
+            if img_fn in seen:
+                continue
             f.writelines(annot)
             f.writelines("\n")
-    print('Num. of annotations: {}(train) {}(test)'.format(num_train, num_cropped_images - num_train))
+            seen.add(img_fn)
+            num_test += 1
+    print('Num. of annotations: {}(train) {}(test)'.format(num_train, num_test))
     print('Created: {}'.format(config.CROPPED_ANNOT_FILE))
     print('Created: {}'.format(config.CROPPED_ANNOT_FILE_TEST))
 
