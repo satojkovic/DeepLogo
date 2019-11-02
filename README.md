@@ -49,7 +49,8 @@ Belows are detection examples.
    $ python gen_tfrecord.py --csv_input flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt --img_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_path test.tfrecord
    ```
 6. Training logo detector using pre-trained SSD.
-   ```
+   ```bash
+   $ ln -s <OBJECT_DETECTION_API_DIR>/ssd_inception_v2_coco_2018_01_28 ssd_inception_v2_coco_2018_01_28
    $ python <OBJECT_DETECTION_API_DIR>/legacy/train.py --logtostderr --pipeline_config_path=ssd_inception_v2.config --train_dir=training
    ```
    <OBJECT_DETECTION_API_DIR> is the absolute path of models/research/object_detection at step1.
