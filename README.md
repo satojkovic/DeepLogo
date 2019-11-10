@@ -55,7 +55,13 @@ Belows are detection examples.
    ```
    <OBJECT_DETECTION_API_DIR> is the absolute path of models/research/object_detection at step1.
 
-7. Testing logo detector.  
+7. Export as pb file.  
+   ```
+   $ python <OBJECT_DETECTION_API_DIR>/export_inference_graph.py --input_type=image_tensor --pipeline_config_path=ssd_inception_v2.config --trained_checkpoint_prefix=model.ckpt-<STEPS> --output_directory=logos_inference_graph
+   ```
+   \<STEPS> is the steps at training, for example model.ckpt-1234.
+
+8. Testing logo detector.  
    ```
    $ python logo_detection.py --model_name logos_inference_graph/ --label_map flickr_logos_27_label_map.pbtxt --test_annot_text flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt --test_image_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_dir detect_results
    ```
