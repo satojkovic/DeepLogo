@@ -14,6 +14,7 @@ from object_detection.utils import dataset_util
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--train_or_test', required=True, help='Generate tfrecord for train or test')
     parser.add_argument('--csv_input', required=True, help='Path to the csv input')
     parser.add_argument('--img_dir', required=True, help='Path to the image directory')
     parser.add_argument('--output_path', required=True, help='Path to output tfrecord')
@@ -61,12 +62,19 @@ def create_tf_example(csv, img_dir):
 
 if __name__ == "__main__":
     args = parse_arguments()
+    train_or_test = args.train_or_test.lower()
 
     writer = tf.python_io.TFRecordWriter(args.output_path)
     csvs = np.loadtxt(args.csv_input, dtype=str, delimiter=',')
+    img_fnames = set()
+    num_data = 0
     for csv in csvs:
+        img_fname = csv[0]
         tf_example = create_tf_example(csv, args.img_dir)
-        writer.write(tf_example.SerializeToString())
+        if train_or_test == 'train' or (train_or_test == 'test' and not img_fname in img_fnames):
+            writer.write(tf_example.SerializeToString())
+            num_data += 1
+        img_fnames.add(img_fname)
 
     writer.close()
-    print('Generated:', args.output_path)
+    print('Generated ({} imgs): {}'.format(num_data, args.output_path))
