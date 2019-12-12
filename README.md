@@ -66,6 +66,38 @@ Belows are detection examples.
    $ python logo_detection.py --model_name logos_inference_graph/ --label_map flickr_logos_27_label_map.pbtxt --test_annot_text flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt --test_image_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_dir detect_results
    ```
 
+### Evaluation
+
+First, modify num_examples field in training/pipeline.config file.
+
+```
+eval_config: {
+  num_examples: 438
+  # Note: The below line limits the evaluation process to 10 evaluations.
+  # Remove the below line to evaluate indefinitely.
+  max_evals: 10
+}
+```
+
+This value is from flickr_logos_27_dataset_test_set_annotation_cropped.txt file.
+
+```bash
+$ wc -l flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt 
+     438 flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt
+```
+
+Then start evaluation process by using eval.py provided within tensorflow/models repository.
+
+```
+$ python <OBJECT_DETECTION_API_DIR>/legacy/eval.py --logtostderr --checkpoint_dir=training --eval_dir=eval --pipeline_config_path=training/pipeline.config
+```
+
+After a while you will get evaluation results. If you want to check the results visually, open tensorboard in your browser.
+
+```bash
+$ tensorboard --logdir=eval/
+```
+
 ### License
 
 MIT
