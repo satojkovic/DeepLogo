@@ -1,8 +1,16 @@
 DeepLogo
 ---
-A brand logo detection system using tensorflow object detection API.
+A brand logo detection system using Tensorflow Object Detection API.
 
-### Examples
+## Description
+
+Tensorflow Object Detection API is the easy to use framework for creating a custom deep learning model that solves object detection problems.
+
+If you already have your own dataset, you can simply create a custom model with sufficient accuracy using a collection of detection models pre-trained on COCO, KITTI, and OpenImages dataset.
+
+DeepLogo provides training and evaluation environments of Tensorflow Object Detection API for creating a brand logo detection model.
+
+## Examples
 
 Belows are detection examples.
 
@@ -14,7 +22,7 @@ Belows are detection examples.
 ![example6](detect_results/detect_result_351.png)
 
 
-### Usage
+## Usage
 
 1. Setup the tensorflow object detection API. First of all, 
    clone the tensorflow/models repository. 
@@ -66,7 +74,7 @@ Belows are detection examples.
    $ python logo_detection.py --model_name logos_inference_graph/ --label_map flickr_logos_27_label_map.pbtxt --test_annot_text flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt --test_image_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_dir detect_results
    ```
 
-### Evaluation
+## Evaluation
 
 First, modify num_examples field in training/pipeline.config file.
 
@@ -98,6 +106,6 @@ After a while you will get evaluation results. If you want to check the results 
 $ tensorboard --logdir=eval/
 ```
 
-### License
+## License
 
 MIT
