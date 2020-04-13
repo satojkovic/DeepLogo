@@ -10,16 +10,15 @@ If you already have your own dataset, you can simply create a custom model with 
 
 DeepLogo provides training and evaluation environments of Tensorflow Object Detection API for creating a brand logo detection model.
 
-## Examples
+## Detection Results
 
-Belows are detection examples.
+These are some detection results by DeepLogo.
 
-![example1](detect_results/detect_result_029.png)
-![example2](detect_results/detect_result_049.png)
-![example3](detect_results/detect_result_055.png)
-![example4](detect_results/detect_result_056.png)
-![example5](detect_results/detect_result_082.png)
-![example6](detect_results/detect_result_351.png)
+|||
+|---|---|
+|![example1](detect_results/detect_result_029.png)|![example2](detect_results/detect_result_049.png)|
+|![example3](detect_results/detect_result_055.png)|![example4](detect_results/detect_result_056.png)|
+|![example5](detect_results/detect_result_082.png)|![example6](detect_results/detect_result_351.png)|
 
 
 ## Usage
