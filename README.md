@@ -39,7 +39,9 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
    ```
    $ git clone https://github.com/satojkovic/DeepLogo.git
    ```
-4. Download dataset from [flickr_27_logos_dataset](http://image.ntua.gr/iva/datasets/flickr_logos/) and extract.
+4. Download the flickr logos 27 dataset from [here](http://image.ntua.gr/iva/datasets/flickr_logos/).
+
+   The flickr logos 27 dataset contains 27 classes of brand logo images downloaded from Flickr. The brands included in the dataset are: Adidas, Apple, BMW, Citroen, Coca Cola, DHL, Fedex, Ferrari, Ford, Google, Heineken, HP, McDonalds, Mini, Nbc, Nike, Pepsi, Porsche, Puma, Red Bull, Sprite, Starbucks, Intel, Texaco, Unisef, Vodafone and Yahoo.
    ```
    $ cd DeepLogo
    $ wget http://image.ntua.gr/iva/datasets/flickr_logos/flickr_logos_27_dataset.tar.gz
@@ -71,7 +73,7 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
    ```
    \<STEPS> is the steps at training, for example model.ckpt-1234.
 
-9. Testing logo detector.  
+9.  Testing logo detector.
    ```
    $ python logo_detection.py --model_name logos_inference_graph/ --label_map flickr_logos_27_label_map.pbtxt --test_annot_text flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt --test_image_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_dir detect_results
    ```
