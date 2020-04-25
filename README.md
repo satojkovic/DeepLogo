@@ -50,7 +50,9 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
    $ tar zxvf flickr_logos_27_dataset_images.tar.gz
    $ cd ../
    ```
-5. Preprocess original annotation file and generate <u>flickr_logos_27_dataset_training_set_annotation_cropped.txt</u> and <u>flickr_logos_27_dataset_test_set_annotation_cropped.txt</u>. These two files are used to generate tfrecord files.
+5. Preprocess
+
+   The flickr logos 27 dataset contains an annotation file for training. This file includes not valid annotations such as an empty size bounding box. Therefore these annotations are removed in this preprocess step, then class names are converted into class numbers and generate two preprocessed files. These two files are used to generate tfrecord files.
    ```
    $ cd DeepLogo
    $ python preproc_annot.py
