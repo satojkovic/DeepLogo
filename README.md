@@ -58,6 +58,8 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
    $ python preproc_annot.py
    ```
 6. Generate tfrecord files.
+
+   The Tensorflow Object Detection API expects data to be in the TFRecord format. Run the following command to convert from preprocessed files into TFRecords.
    ```
    $ python gen_tfrecord.py --train_or_test train --csv_input flickr_logos_27_dataset/flickr_logos_27_dataset_training_set_annotation_cropped.txt --img_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_path train.tfrecord
    $ python gen_tfrecord.py --train_or_test test --csv_input flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt --img_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_path test.tfrecord
