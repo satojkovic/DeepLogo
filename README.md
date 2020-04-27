@@ -64,12 +64,18 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
    $ python gen_tfrecord.py --train_or_test train --csv_input flickr_logos_27_dataset/flickr_logos_27_dataset_training_set_annotation_cropped.txt --img_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_path train.tfrecord
    $ python gen_tfrecord.py --train_or_test test --csv_input flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt --img_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_path test.tfrecord
    ```
-7. Training logo detector using pre-trained SSD.
+7. Training
+
+   The Tensorflow Object Detection API has a python script for training called train.py. This script needs two arguments `--pipeline_config_path` and `--train_dir`. (see below)
+
+   DeepLogo assumes that the current directory is under the DeepLogo directory and also the path of pre-trained SSD and tfrecord is the relative path from DeepLogo (these paths are written in ssd_inception_v2.config). Therefore create a symbolic link to the directory of tensorflow/models/research/object_detection/ssd_inception_v2_coco_2018_01_28 first, then run the training script.
+
    ```bash
    $ ln -s <OBJECT_DETECTION_API_DIR>/ssd_inception_v2_coco_2018_01_28 ssd_inception_v2_coco_2018_01_28
    $ python <OBJECT_DETECTION_API_DIR>/legacy/train.py --logtostderr --pipeline_config_path=ssd_inception_v2.config --train_dir=training
    ```
-   <OBJECT_DETECTION_API_DIR> is the absolute path of models/research/object_detection at step1.
+
+   Note: DeepLogo doesn't work in Tensorflow 2.0. When you try to train DeepLogo, checkout `5ba3c3f5` of tensorflow/models.
 
 8. Export as pb file.  
    ```
