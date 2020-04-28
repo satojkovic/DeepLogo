@@ -71,19 +71,26 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
    DeepLogo assumes that the current directory is under the DeepLogo directory and also the path of pre-trained SSD and tfrecord is the relative path from DeepLogo (these paths are written in ssd_inception_v2.config). Therefore create a symbolic link to the directory of tensorflow/models/research/object_detection/ssd_inception_v2_coco_2018_01_28 first, then run the training script.
 
    ```bash
-   $ ln -s <OBJECT_DETECTION_API_DIR>/ssd_inception_v2_coco_2018_01_28 ssd_inception_v2_coco_2018_01_28
-   $ python <OBJECT_DETECTION_API_DIR>/legacy/train.py --logtostderr --pipeline_config_path=ssd_inception_v2.config --train_dir=training
+   $ OBJECT_DETECTION_API_DIR={path to tensorflow/models/research/object_detection}
+   $ ln -s ${OBJECT_DETECTION_API_DIR}/ssd_inception_v2_coco_2018_01_28 ssd_inception_v2_coco_2018_01_28
+   $ python ${OBJECT_DETECTION_API_DIR}/legacy/train.py --logtostderr --pipeline_config_path=ssd_inception_v2.config --train_dir=training
    ```
 
    Note: DeepLogo doesn't work in Tensorflow 2.0. When you try to train DeepLogo, checkout `5ba3c3f5` of tensorflow/models.
 
-8. Export as pb file.  
-   ```
-   $ python <OBJECT_DETECTION_API_DIR>/export_inference_graph.py --input_type=image_tensor --pipeline_config_path=ssd_inception_v2.config --trained_checkpoint_prefix=model.ckpt-<STEPS> --output_directory=logos_inference_graph
-   ```
-   \<STEPS> is the steps at training, for example model.ckpt-1234.
+## Testing
 
-9.  Testing logo detector.
+1. Exporting a trained model for inference
+
+   For testing a model, you should export it to a Tensorflow graph proto first.
+   ```
+   $ STEPS={the number of steps when the model is saved}
+   $ python ${OBJECT_DETECTION_API_DIR}/export_inference_graph.py --input_type=image_tensor --pipeline_config_path=ssd_inception_v2.config --trained_checkpoint_prefix=model.ckpt-${STEPS} --output_directory=logos_inference_graph
+   ```
+
+2. Inference
+
+   Run the following command. The results of logo detection are saved in `--output_dir`.
    ```
    $ python logo_detection.py --model_name logos_inference_graph/ --label_map flickr_logos_27_label_map.pbtxt --test_annot_text flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt --test_image_dir flickr_logos_27_dataset/flickr_logos_27_dataset_images --output_dir detect_results
    ```
