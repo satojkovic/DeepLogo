@@ -97,7 +97,14 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
 
 ## Evaluation
 
-First, modify num_examples field in training/pipeline.config file.
+Before evaluating the trained model saved in training directory, edit the `num_examples` field in training/pipeline.config file.
+
+The `num_examples` field represents the number of test images which is equal to number of lines present in a flickr_logos_27_dataset_test_set_annotation_cropped.txt file.
+
+```
+$ wc -l flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt
+     438 flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt
+```
 
 ```
 eval_config: {
@@ -108,22 +115,15 @@ eval_config: {
 }
 ```
 
-This value is from flickr_logos_27_dataset_test_set_annotation_cropped.txt file.
-
-```bash
-$ wc -l flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt 
-     438 flickr_logos_27_dataset/flickr_logos_27_dataset_test_set_annotation_cropped.txt
-```
-
 Then start evaluation process by using eval.py provided within tensorflow/models repository.
 
 ```
-$ python <OBJECT_DETECTION_API_DIR>/legacy/eval.py --logtostderr --checkpoint_dir=training --eval_dir=eval --pipeline_config_path=training/pipeline.config
+$ python ${OBJECT_DETECTION_API_DIR}/legacy/eval.py --logtostderr --checkpoint_dir=training --eval_dir=eval --pipeline_config_path=training/pipeline.config
 ```
 
 After a while you will get evaluation results. If you want to check the results visually, open tensorboard in your browser.
 
-```bash
+```
 $ tensorboard --logdir=eval/
 ```
 
