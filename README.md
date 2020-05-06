@@ -86,7 +86,7 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
 
    ```shell
    $ STEPS={the number of steps when the model is saved}
-   $ python ${OBJECT_DETECTION_API_DIR}/export_inference_graph.py --input_type=image_tensor --pipeline_config_path=ssd_inception_v2.config --trained_checkpoint_prefix=model.ckpt-${STEPS} --output_directory=logos_inference_graph
+   $ python ${OBJECT_DETECTION_API_DIR}/export_inference_graph.py --input_type=image_tensor --pipeline_config_path=ssd_inception_v2_coco.config --trained_checkpoint_prefix=model.ckpt-${STEPS} --output_directory=logos_inference_graph
    ```
 
 2. Inference
