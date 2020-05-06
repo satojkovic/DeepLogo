@@ -73,7 +73,7 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
    ```shell
    $ OBJECT_DETECTION_API_DIR={path to tensorflow/models/research/object_detection}
    $ ln -s ${OBJECT_DETECTION_API_DIR}/ssd_inception_v2_coco_2018_01_28 ssd_inception_v2_coco_2018_01_28
-   $ python ${OBJECT_DETECTION_API_DIR}/legacy/train.py --logtostderr --pipeline_config_path=ssd_inception_v2.config --train_dir=training
+   $ python ${OBJECT_DETECTION_API_DIR}/legacy/train.py --logtostderr --pipeline_config_path=ssd_inception_v2_coco.config --train_dir=training
    ```
 
    Note: DeepLogo doesn't work in Tensorflow 2.0. When you try to train DeepLogo, checkout `5ba3c3f5` of tensorflow/models.
