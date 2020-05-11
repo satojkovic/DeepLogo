@@ -89,6 +89,8 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
    $ python ${OBJECT_DETECTION_API_DIR}/export_inference_graph.py --input_type=image_tensor --pipeline_config_path=ssd_inception_v2_coco.config --trained_checkpoint_prefix=model.ckpt-${STEPS} --output_directory=logos_inference_graph
    ```
 
+   Alternatively, you can download a trained model from [GoogleDrive](https://drive.google.com/open?id=1lFTUFe69t6SPMv3Thv6ExuNyJHtDxLXM)!
+
 2. Inference
 
    Run the following command. The results of logo detection are saved in `--output_dir`.
