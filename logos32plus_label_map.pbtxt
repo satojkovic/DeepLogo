@@ -1,0 +1,128 @@
+item {
+  id: 1
+  display_name: "HP"
+}
+item {
+  id: 2
+  display_name: "adidas"
+}
+item {
+  id: 3
+  display_name: "aldi"
+}
+item {
+  id: 4
+  display_name: "apple"
+}
+item {
+  id: 5
+  display_name: "becks"
+}
+item {
+  id: 6
+  display_name: "bmw"
+}
+item {
+  id: 7
+  display_name: "carlsberg"
+}
+item {
+  id: 8
+  display_name: "chimay"
+}
+item {
+  id: 9
+  display_name: "cocacola"
+}
+item {
+  id: 10
+  display_name: "corona"
+}
+item {
+  id: 11
+  display_name: "dhl"
+}
+item {
+  id: 12
+  display_name: "erdinger"
+}
+item {
+  id: 13
+  display_name: "esso"
+}
+item {
+  id: 14
+  display_name: "fedex"
+}
+item {
+  id: 15
+  display_name: "ferrari"
+}
+item {
+  id: 16
+  display_name: "ford"
+}
+item {
+  id: 17
+  display_name: "fosters"
+}
+item {
+  id: 18
+  display_name: "google"
+}
+item {
+  id: 19
+  display_name: "guinness"
+}
+item {
+  id: 20
+  display_name: "heineken"
+}
+item {
+  id: 21
+  display_name: "milka"
+}
+item {
+  id: 22
+  display_name: "nvidia"
+}
+item {
+  id: 23
+  display_name: "paulaner"
+}
+item {
+  id: 24
+  display_name: "pepsi"
+}
+item {
+  id: 25
+  display_name: "rittersport"
+}
+item {
+  id: 26
+  display_name: "shell"
+}
+item {
+  id: 27
+  display_name: "singha"
+}
+item {
+  id: 28
+  display_name: "starbucks"
+}
+item {
+  id: 29
+  display_name: "stellaartois"
+}
+item {
+  id: 30
+  display_name: "texaco"
+}
+item {
+  id: 31
+  display_name: "tsingtao"
+}
+item {
+  id: 32
+  display_name: "ups"
+}
