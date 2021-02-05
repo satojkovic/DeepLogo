@@ -34,7 +34,7 @@ In order to use that pre-trained model, setting up the tensorflow/models reposit
    $ tar zxvf ssd_inception_v2_coco_2018_01_28.tar.gz
    ```
    Tensorflow Object Detection API depends on many other libraries.
-   For detailed steps to setup, please follow the [official installation instruction](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md).
+   For detailed steps to setup, please follow the [official installation instruction](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1.md).
 3. Clone the DeepLogo repository.
    ```shell
    $ git clone https://github.com/satojkovic/DeepLogo.git
