@@ -1,5 +1,9 @@
-DeepLogo
----
+# [Update]
+
+## [DeepLogo2](https://github.com/satojkovic/DeepLogo2) with [DETR](https://github.com/facebookresearch/detr) is available
+
+# DeepLogo
+
 A brand logo detection system using Tensorflow Object Detection API.
 
 ## Description
